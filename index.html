@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FinTrack — Dashboard</title>
+
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+  <div class="app">
+
+    <!-- NAVBAR -->
+    <header class="navbar glass-card">
+      <div class="brand">
+        <span class="logo-cube"></span>
+        <span class="brand-text">FinTrack</span>
+      </div>
+
+      <div style="display:flex;gap:12px;align-items:center">
+        <div id="monthDisplay"></div>
+        <button id="logoutBtn" class="btn-secondary">Logout</button>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="main-grid">
+
+      <!-- LEFT -->
+      <section class="left-panel">
+
+        <div class="summary-grid">
+          <div class="summary-card glass-card card-3d">
+            <h3>Monthly Income</h3>
+            <p id="incomeValue">₹0</p>
+          </div>
+          <div class="summary-card glass-card card-3d">
+            <h3>Budget Limit</h3>
+            <p id="budgetValue">₹0</p>
+          </div>
+          <div class="summary-card glass-card card-3d">
+            <h3>Total Spent</h3>
+            <p id="spentValue">₹0</p>
+          </div>
+          <div class="summary-card glass-card card-3d">
+            <h3>Remaining</h3>
+            <p id="remainingValue">₹0</p>
+          </div>
+        </div>
+
+        <!-- Budget -->
+        <div class="glass-card card-3d form-card">
+          <h2>Set Monthly Budget</h2>
+          <form id="budgetForm">
+            <input id="incomeInput" type="number" placeholder="Monthly income" required />
+            <input id="budgetInput" type="number" placeholder="Budget limit" required />
+            <button type="submit">Save Budget</button>
+          </form>
+        </div>
+
+        <!-- Expense -->
+        <div class="glass-card card-3d form-card">
+          <h2>Add Expense</h2>
+          <form id="expenseForm">
+            <input id="titleInput" placeholder="Title" required />
+            <input id="amountInput" type="number" placeholder="Amount" required />
+            <select id="categoryInput">
+              <option>Food</option>
+              <option>Transport</option>
+              <option>Shopping</option>
+              <option>Bills</option>
+              <option>Entertainment</option>
+            </select>
+            <input id="dateInput" type="date" required />
+            <button type="submit">Add Expense</button>
+          </form>
+        </div>
+
+      </section>
+
+      <!-- RIGHT -->
+      <section class="right-panel">
+        <div class="glass-card chart-card">
+          <h2>Spending by Category</h2>
+          <canvas id="expenseChart"></canvas>
+        </div>
+
+        <div class="glass-card table-card">
+          <h2>Recent Expenses</h2>
+          <table>
+            <thead>
+              <tr><th>Title</th><th>Category</th><th>Amount</th><th>Date</th></tr>
+            </thead>
+            <tbody id="expenseTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Chart -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Firebase -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyCnhYkubvXjU_hmVHfVdmt5rcyA1mdIi3A",
+      authDomain: "expense---tracker-9957e.firebaseapp.com",
+      projectId: "expense---tracker-9957e"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+
+    // 🔐 AUTH GUARD
+    auth.onAuthStateChanged(user => {
+      if (!user) {
+        window.location.href = "login.html";
+      }
+    });
+
+    // LOGOUT
+    document.getElementById("logoutBtn").onclick = async () => {
+      await auth.signOut();
+      window.location.href = "login.html";
+    };
+  </script>
+
+  <!-- App Logic -->
+  <script src="app.js"></script>
+
+</body>
+</html>

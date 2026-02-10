@@ -1,0 +1,580 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>FinTrack — Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Small dashboard-specific improvements */
+    .top-row {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:12px;
+      margin-bottom:12px;
+    }
+    #verificationBanner {
+      background: linear-gradient(90deg, rgba(255,160,160,0.06), rgba(255,230,230,0.03));
+      border: 1px solid rgba(255,160,160,0.08);
+      color: #ffdede;
+      padding: 10px 12px;
+      border-radius: 12px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:10px;
+      margin-bottom:14px;
+    }
+    #verificationBanner .msg { flex:1; font-size:0.95rem; color:#ffecec; }
+    #verificationBanner button { padding:8px 10px; border-radius:10px; border:none; cursor:pointer; background:linear-gradient(90deg,#ff7b7b,#ffb3b3); color:#111; font-weight:600; }
+    #controls { display:flex; gap:10px; align-items:center; }
+    #filterMonth { padding:8px 10px; border-radius:10px; background:rgba(255,255,255,0.02); color:#fff; border:1px solid rgba(255,255,255,0.03); }
+    .action-btn { padding:6px 10px; border-radius:8px; border:none; cursor:pointer; font-weight:600; }
+    .edit-btn { background:linear-gradient(90deg,#60a5fa,#7c3aed); color:#fff; }
+    .delete-btn { background:linear-gradient(90deg,#fb7185,#f97316); color:#fff; }
+    .small-note { color:var(--text-soft); font-size:0.9rem; margin-top:6px; }
+    /* Inline edit row */
+    .edit-row { display:flex; gap:8px; align-items:center; }
+    .edit-row input, .edit-row select { padding:6px; border-radius:8px; border:1px solid rgba(255,255,255,0.04); background:rgba(255,255,255,0.02); color:#fff; }
+    .msg-success { color:#22c55e; font-weight:600; }
+    .msg-error { color:#fb7185; font-weight:600; }
+  </style>
+</head>
+<body>
+  <header class="navbar glass-card">
+    <div class="brand">
+      <span class="logo-cube"></span>
+      <span class="brand-text">FinTrack</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:12px;">
+      <div id="userEmail" style="color:var(--text-soft)"></div>
+      <button id="logoutBtn" class="btn-primary" style="padding:6px 12px;">Logout</button>
+    </div>
+  </header>
+
+  <main class="app" style="padding-top:18px;">
+    <div class="top-row">
+      <div style="flex:1">
+        <h2 style="margin:0;color:#fff">Dashboard</h2>
+        <div class="small-note">Track expenses, set budgets, and view category charts (private to your account).</div>
+      </div>
+
+      <div id="controls">
+        <select id="filterMonth" title="Filter by month"></select>
+        <button id="exportCsv" class="action-btn" style="background:rgba(255,255,255,0.04);color:#fff">Export CSV</button>
+      </div>
+    </div>
+
+    <!-- Verification Banner (hidden by default) -->
+    <div id="verificationBanner" style="display:none;">
+      <div class="msg">
+        Your email is not verified. Please verify your email to access all features. If you didn't get the email, click <strong>Resend verification</strong>.
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button id="resendVerificationBtn">Resend verification</button>
+        <button id="refreshAuthBtn" style="padding:8px 10px;border-radius:10px;border:none;background:linear-gradient(90deg,#4f46e5,#06b6d4);color:#fff;">I verified — Refresh</button>
+      </div>
+    </div>
+
+    <div id="bannerMessage" style="margin-bottom:10px;"></div>
+
+    <main class="main-grid">
+      <!-- Left: Summary & Forms -->
+      <section class="left-panel">
+        <!-- Summary Cards -->
+        <div class="summary-grid">
+          <div class="summary-card glass-card card-3d">
+            <h3>Monthly Income</h3>
+            <p class="summary-value" id="incomeValue">₹0</p>
+          </div>
+          <div class="summary-card glass-card card-3d">
+            <h3>Budget Limit</h3>
+            <p class="summary-value" id="budgetValue">₹0</p>
+          </div>
+          <div class="summary-card glass-card card-3d">
+            <h3>Total Spent</h3>
+            <p class="summary-value" id="spentValue">₹0</p>
+          </div>
+          <div class="summary-card glass-card card-3d">
+            <h3>Remaining</h3>
+            <p class="summary-value" id="remainingValue">₹0</p>
+          </div>
+        </div>
+
+        <!-- Budget Form -->
+        <div class="glass-card card-3d form-card">
+          <h2>Set Monthly Budget</h2>
+          <form id="budgetForm">
+            <div class="form-group">
+              <label for="incomeInput">Monthly Income (₹)</label>
+              <input type="number" id="incomeInput" min="0" />
+            </div>
+            <div class="form-group">
+              <label for="budgetInput">Budget Limit (₹)</label>
+              <input type="number" id="budgetInput" min="0" />
+            </div>
+            <button type="submit" class="btn-primary">Save Budget</button>
+          </form>
+        </div>
+
+        <!-- Expense Form -->
+        <div class="glass-card card-3d form-card">
+          <h2>Add Expense</h2>
+          <form id="expenseForm">
+            <div class="form-group">
+              <label for="titleInput">Title</label>
+              <input type="text" id="titleInput" placeholder="e.g. Groceries" required />
+            </div>
+            <div class="form-group">
+              <label for="amountInput">Amount (₹)</label>
+              <input type="number" id="amountInput" min="1" required />
+            </div>
+            <div class="form-group">
+              <label for="categoryInput">Category</label>
+              <select id="categoryInput">
+                <option>Food</option><option>Transport</option><option>Shopping</option><option>Bills</option><option>Entertainment</option><option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="dateInput">Date</label>
+              <input type="date" id="dateInput" />
+            </div>
+            <button type="submit" class="btn-primary">Add Expense</button>
+            <div id="formMsg" style="margin-top:8px"></div>
+          </form>
+        </div>
+      </section>
+
+      <!-- Right: Chart + List -->
+      <section class="right-panel">
+        <div class="glass-card card-3d chart-card">
+          <div class="chart-header">
+            <h2>Spending by Category</h2>
+          </div>
+          <canvas id="expenseChart"></canvas>
+        </div>
+
+        <div class="glass-card card-3d table-card">
+          <div class="table-header">
+            <h2>Recent Expenses</h2>
+          </div>
+          <div class="table-wrapper">
+            <table>
+              <thead>
+                <tr>
+                  <th>Title</th>
+                  <th>Category</th>
+                  <th>Amount</th>
+                  <th>Date</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="expenseTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </main>
+
+  <!-- libs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- firebase compat -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+  <script>
+    // firebase config (same as other pages)
+    const firebaseConfig = {
+      apiKey: "AIzaSyCnhYkubvXjU_hmVHfVdmt5rcyA1mdIi3A",
+      authDomain: "expense---tracker-9957e.firebaseapp.com",
+      projectId: "expense---tracker-9957e",
+      storageBucket: "expense---tracker-9957e.appspot.com",
+      messagingSenderId: "736738060052",
+      appId: "1:736738060052:web:7146800447fe6e47190401"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.firestore();
+  </script>
+
+  <script>
+    // DOM
+    const userEmailEl = document.getElementById("userEmail");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    const verificationBanner = document.getElementById("verificationBanner");
+    const resendVerificationBtn = document.getElementById("resendVerificationBtn");
+    const refreshAuthBtn = document.getElementById("refreshAuthBtn");
+    const bannerMessage = document.getElementById("bannerMessage");
+
+    const filterMonth = document.getElementById("filterMonth");
+    const exportCsvBtn = document.getElementById("exportCsv");
+
+    const incomeValueEl = document.getElementById("incomeValue");
+    const budgetValueEl = document.getElementById("budgetValue");
+    const spentValueEl = document.getElementById("spentValue");
+    const remainingValueEl = document.getElementById("remainingValue");
+
+    const budgetForm = document.getElementById("budgetForm");
+    const incomeInput = document.getElementById("incomeInput");
+    const budgetInput = document.getElementById("budgetInput");
+
+    const expenseForm = document.getElementById("expenseForm");
+    const titleInput = document.getElementById("titleInput");
+    const amountInput = document.getElementById("amountInput");
+    const categoryInput = document.getElementById("categoryInput");
+    const dateInput = document.getElementById("dateInput");
+    const expenseTableBody = document.getElementById("expenseTableBody");
+    const formMsg = document.getElementById("formMsg");
+
+    let expenseChart;
+    let currentUser = null;
+    let budgets = { income: 0, limit: 0 };
+    let expenses = []; // local cache (all expenses)
+
+    // init filterMonth options (last 14 months)
+    function initMonthOptions() {
+      const now = new Date();
+      for (let i=0;i<14;i++){
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const val = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+        const label = d.toLocaleString('en-US',{month:'short',year:'numeric'});
+        const opt = document.createElement('option');
+        opt.value = val;
+        opt.textContent = label;
+        filterMonth.appendChild(opt);
+      }
+      // default current month
+      filterMonth.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+    }
+    initMonthOptions();
+
+    // utils
+    function formatCurrency(v){ return "₹" + Number(v||0).toLocaleString("en-IN"); }
+    function showBanner(type, msg){
+      bannerMessage.innerHTML = `<div class="${type==='ok'?'msg-success':'msg-error'}">${msg}</div>`;
+      setTimeout(()=> bannerMessage.innerHTML = "", 3500);
+    }
+
+    // compute totals and render summary
+    function reRenderAll() {
+      const selectedMonth = filterMonth.value; // yyyy-mm
+      const filtered = expenses.filter(e => {
+        const ym = `${e.dateObj.getFullYear()}-${String(e.dateObj.getMonth()+1).padStart(2,'0')}`;
+        return ym === selectedMonth;
+      });
+      const totalSpent = filtered.reduce((s,e)=>s+e.amount,0);
+      const remaining = Math.max(budgets.limit - totalSpent, 0);
+
+      incomeValueEl.textContent = formatCurrency(budgets.income);
+      budgetValueEl.textContent = formatCurrency(budgets.limit);
+      spentValueEl.textContent = formatCurrency(totalSpent);
+      remainingValueEl.textContent = formatCurrency(remaining);
+
+      renderTable(filtered);
+      renderChart(filtered);
+    }
+
+    function renderTable(list) {
+      expenseTableBody.innerHTML = "";
+      // latest first
+      const sorted = [...list].sort((a,b)=>b.dateObj - a.dateObj);
+      sorted.forEach(e => {
+        const tr = document.createElement('tr');
+
+        const titleTd = document.createElement('td');
+        titleTd.textContent = e.title;
+
+        const catTd = document.createElement('td');
+        catTd.textContent = e.category;
+
+        const amtTd = document.createElement('td');
+        amtTd.textContent = formatCurrency(e.amount);
+
+        const dateTd = document.createElement('td');
+        dateTd.textContent = e.dateObj.toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'});
+
+        const actionsTd = document.createElement('td');
+
+        // Edit button
+        const editBtn = document.createElement('button');
+        editBtn.className = 'edit-btn action-btn';
+        editBtn.textContent = 'Edit';
+        editBtn.addEventListener('click', ()=> openEditRow(e, tr));
+
+        // Delete button
+        const delBtn = document.createElement('button');
+        delBtn.className = 'delete-btn action-btn';
+        delBtn.textContent = 'Delete';
+        delBtn.addEventListener('click', ()=> deleteExpense(e.id));
+
+        actionsTd.appendChild(editBtn);
+        actionsTd.appendChild(delBtn);
+
+        tr.appendChild(titleTd);
+        tr.appendChild(catTd);
+        tr.appendChild(amtTd);
+        tr.appendChild(dateTd);
+        tr.appendChild(actionsTd);
+
+        expenseTableBody.appendChild(tr);
+      });
+
+      if (sorted.length === 0) {
+        const tr = document.createElement('tr');
+        const td = document.createElement('td');
+        td.colSpan = 5;
+        td.style.color = 'var(--text-soft)';
+        td.textContent = 'No expenses for selected month.';
+        tr.appendChild(td);
+        expenseTableBody.appendChild(tr);
+      }
+    }
+
+    function computeCategoryTotals(list){
+      const map = {};
+      list.forEach(e => map[e.category] = (map[e.category]||0) + e.amount);
+      return { labels: Object.keys(map), data: Object.values(map) };
+    }
+
+    function renderChart(list){
+      const { labels, data } = computeCategoryTotals(list);
+      if (expenseChart) expenseChart.destroy();
+      const ctx = document.getElementById('expenseChart').getContext('2d');
+      expenseChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: { labels, datasets: [{ data, borderWidth: 1 }] },
+        options: {
+          plugins: { legend: { labels: { color: '#e5e7eb' } } }
+        }
+      });
+    }
+
+    // Inline edit
+    function openEditRow(expense, rowElement) {
+      // replace row content with inline edit controls
+      const editRow = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 5;
+      const wrapper = document.createElement('div');
+      wrapper.className = 'edit-row';
+
+      const titleIn = document.createElement('input');
+      titleIn.value = expense.title;
+      titleIn.style.width = '26%';
+
+      const catIn = document.createElement('select');
+      ['Food','Transport','Shopping','Bills','Entertainment','Other'].forEach(c=>{
+        const o = document.createElement('option'); o.value = c; o.textContent = c;
+        if (c === expense.category) o.selected = true;
+        catIn.appendChild(o);
+      });
+      catIn.style.width = '18%';
+
+      const amtIn = document.createElement('input');
+      amtIn.type = 'number';
+      amtIn.value = expense.amount;
+      amtIn.style.width = '18%';
+
+      const dateIn = document.createElement('input');
+      dateIn.type = 'date';
+      dateIn.value = expense.date;
+      dateIn.style.width = '20%';
+
+      const saveBtn = document.createElement('button');
+      saveBtn.textContent = 'Save';
+      saveBtn.className = 'action-btn edit-btn';
+      saveBtn.addEventListener('click', async ()=>{
+        // validation
+        const newTitle = titleIn.value.trim();
+        const newCat = catIn.value;
+        const newAmt = Number(amtIn.value);
+        const newDate = dateIn.value;
+        if (!newTitle || !newAmt) {
+          showBanner('err','Please fill title and amount.');
+          return;
+        }
+        try {
+          await db.collection('users').doc(currentUser.uid).collection('expenses').doc(expense.id).update({
+            title: newTitle, category: newCat, amount: newAmt, date: newDate
+          });
+          showBanner('ok','Expense updated');
+        } catch (err) {
+          showBanner('err', err.message);
+        }
+      });
+
+      const cancelBtn = document.createElement('button');
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.className = 'action-btn';
+      cancelBtn.addEventListener('click', ()=> { reRenderAll(); });
+
+      wrapper.appendChild(titleIn);
+      wrapper.appendChild(catIn);
+      wrapper.appendChild(amtIn);
+      wrapper.appendChild(dateIn);
+      wrapper.appendChild(saveBtn);
+      wrapper.appendChild(cancelBtn);
+
+      td.appendChild(wrapper);
+      editRow.appendChild(td);
+      // replace the existing row with editRow
+      expenseTableBody.replaceChild(editRow, rowElement);
+    }
+
+    // Delete expense
+    async function deleteExpense(id){
+      if (!confirm('Delete this expense?')) return;
+      try {
+        await db.collection('users').doc(currentUser.uid).collection('expenses').doc(id).delete();
+        showBanner('ok','Expense deleted');
+      } catch (err) {
+        showBanner('err', err.message);
+      }
+    }
+
+    // Export CSV
+    exportCsvBtn.addEventListener('click', ()=>{
+      const selectedMonth = filterMonth.value;
+      const filtered = expenses.filter(e => `${e.dateObj.getFullYear()}-${String(e.dateObj.getMonth()+1).padStart(2,'0')}` === selectedMonth);
+      if (filtered.length === 0) { showBanner('err','No data to export for this month'); return; }
+      const rows = [['Title','Category','Amount','Date']];
+      filtered.forEach(r => rows.push([r.title, r.category, r.amount, r.date]));
+      const csv = rows.map(r => r.map(cell => `"${String(cell).replace(/"/g,'""')}"`).join(',')).join('\n');
+      const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = `expenses-${filterMonth.value}.csv`; a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    // Save budget
+    budgetForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      budgets.income = Number(incomeInput.value || 0);
+      budgets.limit = Number(budgetInput.value || 0);
+      try {
+        await db.collection('users').doc(currentUser.uid).set({ income: budgets.income, limit: budgets.limit }, { merge: true });
+        showBanner('ok','Budget saved');
+      } catch (err) {
+        showBanner('err', err.message);
+      }
+    });
+
+    // Add expense
+    expenseForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const title = titleInput.value.trim();
+      const amount = Number(amountInput.value);
+      const category = categoryInput.value;
+      const dateVal = dateInput.value || new Date().toISOString().split('T')[0];
+      if (!title || !amount) {
+        formMsg.textContent = 'Please enter title and amount';
+        formMsg.style.color = '#fb7185';
+        return;
+      }
+      try {
+        await db.collection('users').doc(currentUser.uid).collection('expenses').add({
+          title, amount, category, date: dateVal, createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        // clear form
+        expenseForm.reset();
+        dateInput.value = new Date().toISOString().split('T')[0];
+        formMsg.textContent = 'Added';
+        formMsg.style.color = '#22c55e';
+        setTimeout(()=> formMsg.textContent = '', 1800);
+      } catch (err) {
+        formMsg.textContent = err.message;
+        formMsg.style.color = '#fb7185';
+      }
+    });
+
+    // Filter change
+    filterMonth.addEventListener('change', ()=> reRenderAll());
+
+    // ------- AUTH + Firestore real-time loading -------
+    // On auth change
+    auth.onAuthStateChanged(async user => {
+      if (!user) {
+        location.href = 'login.html';
+        return;
+      }
+      currentUser = user;
+      userEmailEl.textContent = user.email;
+
+      // show verification banner if not verified
+      if (!user.emailVerified) {
+        verificationBanner.style.display = 'flex';
+      } else {
+        verificationBanner.style.display = 'none';
+      }
+
+      // load user budgets (single document)
+      const userDocRef = db.collection('users').doc(user.uid);
+      userDocRef.get().then(doc => {
+        if (doc.exists) {
+          const d = doc.data();
+          budgets.income = d.income || 0;
+          budgets.limit = d.limit || 0;
+          incomeInput.value = budgets.income || '';
+          budgetInput.value = budgets.limit || '';
+        }
+      });
+
+      // Listen to expenses in realtime
+      db.collection('users').doc(user.uid).collection('expenses')
+        .orderBy('createdAt','desc')
+        .onSnapshot(snapshot => {
+          expenses = snapshot.docs.map(doc => {
+            const d = doc.data();
+            return {
+              id: doc.id,
+              title: d.title || '',
+              amount: d.amount || 0,
+              category: d.category || 'Other',
+              date: d.date || (d.createdAt ? d.createdAt.toDate().toISOString().split('T')[0] : new Date().toISOString().split('T')[0]),
+              dateObj: d.date ? new Date(d.date) : (d.createdAt ? d.createdAt.toDate() : new Date())
+            };
+          });
+          reRenderAll();
+        }, err => {
+          showBanner('err', err.message);
+        });
+
+    });
+
+    // Resend verification
+    resendVerificationBtn.addEventListener('click', async ()=>{
+      try {
+        await auth.currentUser.sendEmailVerification();
+        showBanner('ok','Verification email resent. Check your inbox.');
+      } catch (err) {
+        showBanner('err', err.message);
+      }
+    });
+
+    // Refresh auth state (user clicks after verifying)
+    refreshAuthBtn.addEventListener('click', async ()=>{
+      try {
+        await auth.currentUser.reload();
+        const user = auth.currentUser;
+        if (user.emailVerified) {
+          verificationBanner.style.display = 'none';
+          showBanner('ok','Email verified — you now have full access.');
+        } else {
+          showBanner('err','Email still not verified. Check your inbox.');
+        }
+      } catch (err) {
+        showBanner('err', err.message);
+      }
+    });
+
+    logoutBtn.addEventListener('click', ()=> auth.signOut().then(()=> location.href='login.html'));
+
+    // initial date default
+    dateInput.value = new Date().toISOString().split('T')[0];
+  </script>
+</body>
+</html>
