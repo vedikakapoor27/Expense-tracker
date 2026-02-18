@@ -79,9 +79,55 @@ function render() {
       <td>${e.category}</td>
       <td>${formatCurrency(e.amount)}</td>
       <td>${e.date}</td>
+      <td>
+        <button onclick="editExpense('${e.id}')">Edit</button>
+        <button onclick="deleteExpense('${e.id}')">Delete</button>
+      </td>
     `;
     expenseTableBody.appendChild(tr);
   });
 
   spentValueEl.textContent = formatCurrency(total);
+}
+// 🗑 DELETE
+async function deleteExpense(id) {
+  if (!confirm("Delete this expense?")) return;
+
+  await db
+    .collection("users")
+    .doc(currentUser.uid)
+    .collection("expenses")
+    .doc(id)
+    .delete();
+
+  await loadExpenses();
+  render();
+}
+
+// ✏️ EDIT
+async function editExpense(id) {
+  const exp = expenses.find(e => e.id === id);
+  if (!exp) return;
+
+  const newTitle = prompt("Edit title:", exp.title);
+  const newAmount = Number(prompt("Edit amount:", exp.amount));
+  const newCategory = prompt("Edit category:", exp.category);
+  const newDate = prompt("Edit date (YYYY-MM-DD):", exp.date);
+
+  if (!newTitle || !newAmount || !newDate) return;
+
+  await db
+    .collection("users")
+    .doc(currentUser.uid)
+    .collection("expenses")
+    .doc(id)
+    .update({
+      title: newTitle,
+      amount: newAmount,
+      category: newCategory,
+      date: newDate
+    });
+
+  await loadExpenses();
+  render();
 }
