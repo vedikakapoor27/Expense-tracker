@@ -23,9 +23,9 @@
         <span class="brand-text">FinTrack</span>
       </div>
 
-      <div style="display:flex;gap:12px;align-items:center">
-        <div id="monthDisplay"></div>
-        <button id="logoutBtn" class="btn-secondary">Logout</button>
+      <div class="nav-right">
+        <div id="monthDisplay" class="month-display" aria-live="polite"></div>
+        <button id="logoutBtn" class="btn-secondary" type="button">Logout</button>
       </div>
     </header>
 
@@ -35,50 +35,90 @@
       <!-- LEFT -->
       <section class="left-panel">
 
-        <div class="summary-grid">
+        <div class="summary-grid" aria-label="Monthly financial summary">
           <div class="summary-card glass-card card-3d">
             <h3>Monthly Income</h3>
-            <p id="incomeValue">₹0</p>
+            <p id="incomeValue" class="summary-value">₹0</p>
           </div>
           <div class="summary-card glass-card card-3d">
             <h3>Budget Limit</h3>
-            <p id="budgetValue">₹0</p>
+            <p id="budgetValue" class="summary-value">₹0</p>
           </div>
           <div class="summary-card glass-card card-3d">
             <h3>Total Spent</h3>
-            <p id="spentValue">₹0</p>
+            <p id="spentValue" class="summary-value">₹0</p>
           </div>
           <div class="summary-card glass-card card-3d">
             <h3>Remaining</h3>
-            <p id="remainingValue">₹0</p>
+            <p id="remainingValue" class="summary-value">₹0</p>
           </div>
         </div>
 
         <!-- Budget -->
         <div class="glass-card card-3d form-card">
           <h2>Set Monthly Budget</h2>
-          <form id="budgetForm">
-            <input id="incomeInput" type="number" placeholder="Monthly income" required />
-            <input id="budgetInput" type="number" placeholder="Budget limit" required />
-            <button type="submit">Save Budget</button>
+          <form id="budgetForm" novalidate>
+            <div class="form-group">
+              <label for="incomeInput">Monthly income</label>
+              <input
+                id="incomeInput"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="e.g. 50,000"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="budgetInput">Budget limit</label>
+              <input
+                id="budgetInput"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="e.g. 30,000"
+                required
+              />
+            </div>
+            <button type="submit" class="btn-primary">Save Budget</button>
           </form>
         </div>
 
         <!-- Expense -->
         <div class="glass-card card-3d form-card">
           <h2>Add Expense</h2>
-          <form id="expenseForm">
-            <input id="titleInput" placeholder="Title" required />
-            <input id="amountInput" type="number" placeholder="Amount" required />
-            <select id="categoryInput">
-              <option>Food</option>
-              <option>Transport</option>
-              <option>Shopping</option>
-              <option>Bills</option>
-              <option>Entertainment</option>
-            </select>
-            <input id="dateInput" type="date" required />
-            <button type="submit">Add Expense</button>
+          <form id="expenseForm" novalidate>
+            <div class="form-group">
+              <label for="titleInput">Title</label>
+              <input id="titleInput" placeholder="e.g. Groceries" required />
+            </div>
+            <div class="form-group">
+              <label for="amountInput">Amount</label>
+              <input
+                id="amountInput"
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="e.g. 1,200"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="categoryInput">Category</label>
+              <select id="categoryInput">
+                <option>Food</option>
+                <option>Transport</option>
+                <option>Shopping</option>
+                <option>Bills</option>
+                <option>Entertainment</option>
+                <option>Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="dateInput">Date</label>
+              <input id="dateInput" type="date" required />
+            </div>
+            <button type="submit" class="btn-primary">Add Expense</button>
           </form>
         </div>
 
@@ -93,12 +133,20 @@
 
         <div class="glass-card table-card">
           <h2>Recent Expenses</h2>
-          <table>
-            <thead>
-              <tr><th>Title</th><th>Category</th><th>Amount</th><th>Date</th></tr>
-            </thead>
-            <tbody id="expenseTableBody"></tbody>
-          </table>
+          <div class="table-wrapper">
+            <table aria-label="Recent expenses">
+              <thead>
+                <tr>
+                  <th scope="col">Title</th>
+                  <th scope="col">Category</th>
+                  <th scope="col">Amount</th>
+                  <th scope="col">Date</th>
+                  <th scope="col" class="actions-header">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="expenseTableBody"></tbody>
+            </table>
+          </div>
         </div>
       </section>
 
