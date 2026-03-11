@@ -5,38 +5,207 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>FinTrack — Home</title>
   <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    .hero {
+      text-align: center;
+      padding: 5rem 1rem 3rem;
+    }
+    .hero-badge {
+      display: inline-block;
+      padding: 4px 14px;
+      border-radius: 999px;
+      background: rgba(79,70,229,0.15);
+      border: 1px solid rgba(79,70,229,0.35);
+      color: #a5b4fc;
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-bottom: 1.2rem;
+    }
+    .hero h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #e0e7ff 30%, #22c55e 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero p {
+      color: var(--text-soft);
+      font-size: 1.05rem;
+      max-width: 520px;
+      margin: 0 auto 2rem;
+      line-height: 1.7;
+    }
+    .hero-btns { display:flex; gap:12px; justify-content:center; flex-wrap:wrap; }
+    .hero-btns a {
+      padding: 11px 28px;
+      border-radius: 999px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      text-decoration: none;
+      transition: transform 0.18s, box-shadow 0.18s;
+    }
+    .hero-btns a:hover { transform: translateY(-2px); }
+    .btn-cta {
+      background: linear-gradient(135deg, #4f46e5, #22c55e);
+      color: #fff;
+      box-shadow: 0 10px 28px rgba(79,70,229,0.4);
+    }
+    .btn-cta:hover { box-shadow: 0 14px 36px rgba(79,70,229,0.6); }
+    .btn-outline {
+      background: transparent;
+      color: var(--text-main);
+      border: 1px solid rgba(148,163,184,0.25);
+    }
+    .btn-outline:hover { border-color: rgba(129,140,248,0.6); background: rgba(79,70,229,0.08); }
+
+    .features {
+      max-width: 1000px;
+      margin: 0 auto 4rem;
+      padding: 0 1rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.1rem;
+    }
+    .feature-card {
+      padding: 1.4rem 1.3rem;
+      border-radius: var(--radius-xl);
+      background: linear-gradient(135deg, rgba(15,23,42,0.9), rgba(15,23,42,0.85));
+      border: 1px solid rgba(148,163,184,0.12);
+      box-shadow: 0 8px 28px rgba(0,0,0,0.4);
+      transition: transform 0.22s, border-color 0.22s, box-shadow 0.22s;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at top left, rgba(79,70,229,0.12), transparent 60%);
+      pointer-events: none;
+    }
+    .feature-card:hover {
+      transform: translateY(-6px);
+      border-color: rgba(129,140,248,0.4);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.6);
+    }
+    .feature-icon { font-size:1.6rem; margin-bottom:0.65rem; display:block; }
+    .feature-card h3 { font-size:0.95rem; font-weight:600; margin-bottom:0.4rem; color:#e0e7ff; }
+    .feature-card p  { font-size:0.82rem; color:var(--text-soft); line-height:1.6; }
+
+    .steps-section {
+      max-width: 700px;
+      margin: 0 auto 4rem;
+      padding: 0 1rem;
+      text-align: center;
+    }
+    .steps-section h2 { font-size:1.4rem; font-weight:600; margin-bottom:1.5rem; color:#e0e7ff; }
+    .steps { display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; }
+    .step {
+      flex: 1;
+      min-width: 160px;
+      padding: 1.1rem;
+      border-radius: 14px;
+      background: rgba(15,23,42,0.7);
+      border: 1px solid rgba(148,163,184,0.1);
+    }
+    .step-num {
+      width:32px; height:32px; border-radius:50%;
+      background: linear-gradient(135deg,#4f46e5,#22c55e);
+      color:#fff; font-weight:700; font-size:0.85rem;
+      display:flex; align-items:center; justify-content:center;
+      margin: 0 auto 0.6rem;
+    }
+    .step p { font-size:0.82rem; color:var(--text-soft); }
+    .home-footer {
+      text-align:center; padding:1.5rem;
+      font-size:0.8rem; color:var(--text-soft);
+      border-top:1px solid rgba(255,255,255,0.04);
+    }
+  </style>
 </head>
 <body>
-  <header class="navbar glass-card">
+  <header class="navbar glass-card" style="max-width:1100px;margin:0.75rem auto 0;">
     <div class="brand">
       <span class="logo-cube"></span>
       <span class="brand-text">FinTrack</span>
     </div>
-    <div style="display:flex;gap:12px;">
-      <a href="login.html" class="btn-primary" style="padding:8px 14px; text-decoration:none;">Login</a>
-      <a href="login.html" class="btn-primary" style="padding:8px 14px; text-decoration:none;">Get Started</a>
+    <div style="display:flex;gap:10px;">
+      <a href="login.html" style="padding:7px 18px;border-radius:999px;font-size:0.88rem;font-weight:600;text-decoration:none;color:var(--text-main);border:1px solid rgba(148,163,184,0.22);transition:all 0.18s;">Login</a>
+      <a href="login.html" class="btn-cta" style="padding:7px 18px;border-radius:999px;font-size:0.88rem;font-weight:600;text-decoration:none;">Get Started</a>
     </div>
   </header>
 
-  <main style="max-width:1000px;margin:3rem auto;padding:1rem;color:var(--text-main);">
-    <h1 style="font-size:2.1rem;margin-bottom:0.5rem;">FinTrack</h1>
-    <p style="color:var(--text-soft);margin-bottom:1rem;">A simple personal expense tracker. Sign up and start tracking your expenses securely with Firebase.</p>
+  <section class="hero">
+    <div class="hero-badge">🇮🇳 Built for Indian users · Firebase-powered</div>
+    <h1>Take control of<br/>your finances</h1>
+    <p>FinTrack helps you log expenses, set budgets, visualise spending, and export reports — all securely tied to your account.</p>
+    <div class="hero-btns">
+      <a href="login.html" class="btn-cta">Start for free →</a>
+      <a href="login.html" class="btn-outline">Sign in</a>
+    </div>
+  </section>
 
-    <section style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:2rem;">
-      <div class="glass-card" style="padding:1.2rem;">
-        <h3>Quick Start</h3>
-        <ol style="color:var(--text-soft);margin-left:1rem;">
-          <li>Click Get Started</li>
-          <li>Create an account or log in</li>
-          <li>Add expenses — they’ll be saved to your account</li>
-        </ol>
-      </div>
+  <div class="features">
+    <div class="feature-card">
+      <span class="feature-icon">📊</span>
+      <h3>Live Charts</h3>
+      <p>Doughnut and bar charts show exactly where your money goes, updated in real time.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🎯</span>
+      <h3>Budget Alerts</h3>
+      <p>Get warned at 80% and alerted the moment you exceed your monthly limit.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🔍</span>
+      <h3>Search & Filter</h3>
+      <p>Instantly search by title or category, and filter by any month.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">⬇️</span>
+      <h3>Export Reports</h3>
+      <p>Download expenses as CSV or print a clean PDF report in one click.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">🔐</span>
+      <h3>Private & Secure</h3>
+      <p>Each user's data is isolated in Firestore. Only you can access your expenses.</p>
+    </div>
+    <div class="feature-card">
+      <span class="feature-icon">✏️</span>
+      <h3>Inline Editing</h3>
+      <p>Edit any expense directly in the table — no popups, no page reloads needed.</p>
+    </div>
+  </div>
 
-      <div class="glass-card" style="padding:1.2rem;">
-        <h3>Privacy</h3>
-        <p style="color:var(--text-soft);">Your expenses are stored per-user in Firebase Firestore. Only you (your account) can access them.</p>
+  <div class="steps-section">
+    <h2>Up and running in 3 steps</h2>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <p>Create an account or sign in with Google</p>
       </div>
-    </section>
-  </main>
+      <div class="step">
+        <div class="step-num">2</div>
+        <p>Set your monthly income and budget limit</p>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <p>Add expenses and watch your dashboard update live</p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="home-footer">
+    © 2026 FinTrack · Your data lives in Firebase Firestore, private to your account.
+  </footer>
 </body>
 </html>

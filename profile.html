@@ -1,0 +1,475 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>FinTrack — Profile</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+    :root {
+      --bg:       #04070f; --surface:rgba(10,16,28,.88); --surface-2:rgba(15,23,42,.65);
+      --border:   rgba(148,163,184,.1); --border-h:rgba(99,102,241,.4);
+      --accent:   #6366f1; --a2:#22d3ee; --a3:#a78bfa;
+      --green:    #10b981; --red:#f43f5e; --amber:#f59e0b;
+      --text:     #f0f4ff; --text-2:#94a3b8; --text-3:#475569;
+      --mono:     'JetBrains Mono',monospace; --sans:'Outfit',sans-serif;
+      --r:14px; --r-xl:20px;
+    }
+    [data-theme="light"] {
+      --bg:#f1f5f9; --surface:rgba(255,255,255,.9); --surface-2:rgba(241,245,249,.8);
+      --border:rgba(100,116,139,.15); --border-h:rgba(99,102,241,.4);
+      --text:#0f172a; --text-2:#475569; --text-3:#94a3b8;
+    }
+
+    html{scroll-behavior:smooth}
+    body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s}
+    body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+      background:radial-gradient(ellipse 70% 50% at 15% 15%,rgba(99,102,241,.12) 0%,transparent 60%),
+                 radial-gradient(ellipse 55% 40% at 85% 80%,rgba(34,211,238,.08) 0%,transparent 55%)}
+    body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+      background-image:linear-gradient(rgba(148,163,184,.02) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,184,.02) 1px,transparent 1px);
+      background-size:52px 52px}
+    .wrap{position:relative;z-index:1;max-width:780px;margin:0 auto;padding:0 20px 60px}
+
+    /* ── NAVBAR ── */
+    .navbar{position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;height:62px;padding:0 28px;background:rgba(4,7,15,.75);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+    [data-theme="light"] .navbar{background:rgba(241,245,249,.85)}
+    .nav-brand{display:flex;align-items:center;gap:10px}
+    .nav-logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--a2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;box-shadow:0 0 18px rgba(99,102,241,.5);flex-shrink:0}
+    .nav-title{font-size:1.05rem;font-weight:800;letter-spacing:-.02em}
+    .nav-title span{color:var(--accent)}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .nav-link{padding:6px 14px;border-radius:999px;font-size:.8rem;font-weight:600;color:var(--text-2);text-decoration:none;border:1px solid transparent;transition:all .18s}
+    .nav-link:hover{border-color:var(--border-h);color:var(--accent);background:rgba(99,102,241,.07)}
+    .nav-link.active{background:rgba(99,102,241,.12);border-color:rgba(99,102,241,.3);color:var(--accent)}
+    .theme-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .18s}
+    .theme-btn:hover{border-color:var(--border-h)}
+
+    /* ── PAGE HEADER ── */
+    .page-head{padding:32px 0 24px;animation:fadeUp .5s ease both}
+    .page-head h1{font-size:1.8rem;font-weight:800;letter-spacing:-.03em}
+    .page-head h1 em{font-style:normal;background:linear-gradient(90deg,var(--accent),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .page-head p{color:var(--text-2);font-size:.88rem;margin-top:5px}
+
+    /* ── PANEL ── */
+    .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);backdrop-filter:blur(12px);overflow:hidden;margin-bottom:16px;transition:border-color .22s;animation:fadeUp .5s ease both}
+    .panel:hover{border-color:rgba(148,163,184,.18)}
+    .phead{display:flex;align-items:center;gap:12px;padding:18px 22px;border-bottom:1px solid var(--border)}
+    .phead-icon{width:36px;height:36px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+    .phead h2{font-size:.9rem;font-weight:700}
+    .phead p{font-size:.76rem;color:var(--text-2);margin-top:2px}
+    .pbody{padding:20px 22px}
+
+    /* ── AVATAR SECTION ── */
+    .avatar-row{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+    .avatar-wrap{position:relative;flex-shrink:0}
+    .avatar{width:84px;height:84px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.7rem;font-weight:800;color:#fff;border:3px solid rgba(99,102,241,.4);box-shadow:0 0 0 6px rgba(99,102,241,.08);transition:all .22s;cursor:pointer;position:relative;overflow:hidden}
+    .avatar:hover{border-color:var(--accent);box-shadow:0 0 0 8px rgba(99,102,241,.13)}
+    .avatar-overlay{position:absolute;inset:0;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity .2s;font-size:.7rem;color:#fff;font-weight:700;border-radius:50%}
+    .avatar:hover .avatar-overlay{opacity:1}
+    #avatarInput{display:none}
+    .avatar-img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+    .avatar-info h3{font-size:1.1rem;font-weight:700;margin-bottom:4px}
+    .avatar-info p{font-size:.82rem;color:var(--text-2);font-family:var(--mono)}
+    .joined-badge{display:inline-flex;align-items:center;gap:5px;margin-top:8px;padding:3px 10px;border-radius:999px;background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.25);color:var(--green);font-size:.72rem;font-weight:700}
+
+    /* ── FORM FIELDS ── */
+    .fgrid{display:grid;gap:14px}
+    .frow{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+    .flabel{font-size:.72rem;font-weight:700;color:var(--text-2);text-transform:uppercase;letter-spacing:.07em;margin-bottom:5px;display:block}
+    .finput{width:100%;padding:10px 13px;border-radius:var(--r);background:rgba(4,7,15,.6);border:1px solid var(--border);color:var(--text);font-family:var(--sans);font-size:.88rem;outline:none;transition:border-color .2s,box-shadow .2s}
+    [data-theme="light"] .finput{background:rgba(241,245,249,.8);border-color:rgba(100,116,139,.2)}
+    .finput:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+    .finput::placeholder{color:var(--text-3)}
+    select.finput{appearance:none;cursor:pointer}
+    option{background:#0a1020}
+    [data-theme="light"] option{background:#fff;color:#0f172a}
+
+    /* ── BUTTONS ── */
+    .sbtn{padding:10px 22px;border-radius:var(--r);border:none;cursor:pointer;font-family:var(--sans);font-weight:700;font-size:.88rem;background:linear-gradient(135deg,var(--accent),var(--a3));color:#fff;box-shadow:0 6px 20px rgba(99,102,241,.3);transition:all .2s}
+    .sbtn:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(99,102,241,.5)}
+    .sbtn-outline{padding:10px 22px;border-radius:var(--r);border:1px solid var(--border);cursor:pointer;font-family:var(--sans);font-weight:600;font-size:.88rem;background:transparent;color:var(--text-2);transition:all .2s}
+    .sbtn-outline:hover{border-color:var(--border-h);color:var(--text)}
+    .sbtn-red{background:linear-gradient(135deg,#f43f5e,#fb7185);box-shadow:0 6px 20px rgba(244,63,94,.25)}
+    .sbtn-red:hover{box-shadow:0 10px 28px rgba(244,63,94,.45)}
+
+    /* ── CURRENCY GRID ── */
+    .currency-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+    .cur-card{padding:12px 14px;border-radius:var(--r);border:2px solid var(--border);background:var(--surface-2);cursor:pointer;transition:all .18s;text-align:center}
+    .cur-card:hover{border-color:rgba(99,102,241,.4)}
+    .cur-card.active{border-color:var(--accent);background:rgba(99,102,241,.1);box-shadow:0 0 0 3px rgba(99,102,241,.1)}
+    .cur-symbol{font-size:1.3rem;font-weight:800;display:block;margin-bottom:3px}
+    .cur-code{font-size:.72rem;font-weight:700;color:var(--text-2);font-family:var(--mono)}
+    .cur-name{font-size:.68rem;color:var(--text-3);margin-top:2px}
+
+    /* ── THEME TOGGLE LARGE ── */
+    .theme-row{display:flex;gap:12px}
+    .theme-card{flex:1;padding:16px;border-radius:var(--r);border:2px solid var(--border);background:var(--surface-2);cursor:pointer;transition:all .18s;text-align:center}
+    .theme-card:hover{border-color:rgba(99,102,241,.4)}
+    .theme-card.active{border-color:var(--accent);background:rgba(99,102,241,.1)}
+    .theme-card .icon{font-size:1.5rem;display:block;margin-bottom:6px}
+    .theme-card .label{font-size:.82rem;font-weight:700}
+    .theme-card .desc{font-size:.72rem;color:var(--text-2);margin-top:3px}
+
+    /* ── DANGER ZONE ── */
+    .danger-panel{border-color:rgba(244,63,94,.2)!important}
+    .danger-panel .phead{border-bottom-color:rgba(244,63,94,.15)}
+    .danger-item{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 0;border-bottom:1px solid rgba(244,63,94,.08)}
+    .danger-item:last-child{border-bottom:none;padding-bottom:0}
+    .danger-item h4{font-size:.88rem;font-weight:600;color:#fda4af}
+    .danger-item p{font-size:.76rem;color:var(--text-3);margin-top:3px}
+
+    /* ── TOAST ── */
+    .toast{position:fixed;bottom:24px;right:24px;z-index:999;padding:12px 18px;border-radius:var(--r);font-size:.84rem;font-weight:600;display:none;animation:slideUp .3s ease}
+    .toast.ok{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.35);color:var(--green)}
+    .toast.err{background:rgba(244,63,94,.12);border:1px solid rgba(244,63,94,.3);color:#fda4af}
+
+    /* ── STATUS MSG ── */
+    .status{font-size:.82rem;font-weight:600;min-height:18px}
+    .status.ok{color:var(--green)}.status.err{color:var(--red)}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+    @media(max-width:600px){
+      .wrap{padding:0 12px 40px}.frow{grid-template-columns:1fr}.currency-grid{grid-template-columns:repeat(2,1fr)}
+      .avatar-row{flex-direction:column;align-items:flex-start}.navbar{padding:0 14px}
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-brand">
+    <div class="nav-logo">F</div>
+    <span class="nav-title">Fin<span>Track</span></span>
+  </div>
+  <div class="nav-right">
+    <a href="dashboard.html" class="nav-link">Dashboard</a>
+    <a href="profile.html"   class="nav-link active">Profile</a>
+    <button id="themeToggle" class="theme-btn" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+  </div>
+</nav>
+
+<div class="wrap">
+  <div class="page-head">
+    <h1>Your <em>Profile</em></h1>
+    <p>Manage your account, appearance, and preferences</p>
+  </div>
+
+  <!-- AVATAR + INFO -->
+  <div class="panel" style="animation-delay:.05s">
+    <div class="phead">
+      <div class="phead-icon" style="background:rgba(99,102,241,.14)">👤</div>
+      <div><h2>Account Info</h2><p>Your public profile details</p></div>
+    </div>
+    <div class="pbody">
+      <div class="avatar-row">
+        <div class="avatar-wrap">
+          <div class="avatar" id="avatarEl" onclick="document.getElementById('avatarInput').click()">
+            <span id="avatarInitials">?</span>
+            <img id="avatarImg" class="avatar-img" style="display:none" alt="avatar"/>
+            <div class="avatar-overlay">📷 Change</div>
+          </div>
+          <input type="file" id="avatarInput" accept="image/*"/>
+        </div>
+        <div class="avatar-info">
+          <h3 id="profileName">Loading…</h3>
+          <p id="profileEmail">—</p>
+          <div class="joined-badge">✓ Verified account</div>
+        </div>
+      </div>
+
+      <div style="margin-top:22px">
+        <form id="profileForm" class="fgrid">
+          <div class="frow">
+            <div>
+              <label class="flabel" for="nameInput">Display Name</label>
+              <input id="nameInput" type="text" class="finput" placeholder="Your name"/>
+            </div>
+            <div>
+              <label class="flabel" for="phoneInput">Phone</label>
+              <input id="phoneInput" type="tel" class="finput" placeholder="+91 99999 99999"/>
+            </div>
+          </div>
+          <div>
+            <label class="flabel" for="bioInput">Bio</label>
+            <input id="bioInput" type="text" class="finput" placeholder="e.g. Saving for a trip to Japan 🗺️" maxlength="80"/>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center">
+            <button type="submit" class="sbtn">Save Changes</button>
+            <span id="profileStatus" class="status"></span>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- CURRENCY -->
+  <div class="panel" style="animation-delay:.1s">
+    <div class="phead">
+      <div class="phead-icon" style="background:rgba(34,211,238,.12)">💱</div>
+      <div><h2>Currency Preference</h2><p>All amounts will be displayed in your chosen currency</p></div>
+    </div>
+    <div class="pbody">
+      <div class="currency-grid" id="currencyGrid">
+        <!-- filled by JS -->
+      </div>
+      <p style="font-size:.74rem;color:var(--text-3);margin-top:12px">
+        * Conversion rates are approximate and for display only. Base currency is INR.
+      </p>
+    </div>
+  </div>
+
+  <!-- THEME -->
+  <div class="panel" style="animation-delay:.15s">
+    <div class="phead">
+      <div class="phead-icon" style="background:rgba(167,139,250,.14)">🎨</div>
+      <div><h2>Appearance</h2><p>Choose how FinTrack looks for you</p></div>
+    </div>
+    <div class="pbody">
+      <div class="theme-row">
+        <div class="theme-card" id="darkCard" onclick="selectTheme('dark')">
+          <span class="icon">🌙</span>
+          <div class="label">Dark Mode</div>
+          <div class="desc">Easy on the eyes at night</div>
+        </div>
+        <div class="theme-card" id="lightCard" onclick="selectTheme('light')">
+          <span class="icon">☀️</span>
+          <div class="label">Light Mode</div>
+          <div class="desc">Clean and bright</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECURITY -->
+  <div class="panel" style="animation-delay:.2s">
+    <div class="phead">
+      <div class="phead-icon" style="background:rgba(16,185,129,.12)">🔐</div>
+      <div><h2>Security</h2><p>Manage your password and login</p></div>
+    </div>
+    <div class="pbody">
+      <div class="fgrid">
+        <div>
+          <label class="flabel" for="newPassInput">New Password</label>
+          <input id="newPassInput" type="password" class="finput" placeholder="At least 6 characters"/>
+        </div>
+        <div>
+          <label class="flabel" for="confirmPassInput">Confirm Password</label>
+          <input id="confirmPassInput" type="password" class="finput" placeholder="Re-enter password"/>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <button class="sbtn" onclick="changePassword()">Update Password</button>
+          <span id="passStatus" class="status"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DANGER ZONE -->
+  <div class="panel danger-panel" style="animation-delay:.25s">
+    <div class="phead">
+      <div class="phead-icon" style="background:rgba(244,63,94,.12)">⚠️</div>
+      <div><h2 style="color:#fda4af">Danger Zone</h2><p>Irreversible actions</p></div>
+    </div>
+    <div class="pbody">
+      <div class="danger-item">
+        <div>
+          <h4>Sign out of all devices</h4>
+          <p>Revokes your current session</p>
+        </div>
+        <button class="sbtn sbtn-red" onclick="signOutAll()">Sign Out</button>
+      </div>
+      <div class="danger-item">
+        <div>
+          <h4>Delete all expenses</h4>
+          <p>Permanently removes all your expense records</p>
+        </div>
+        <button class="sbtn sbtn-red" onclick="deleteAllExpenses()">Delete All</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /wrap -->
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+  firebase.initializeApp({
+    apiKey:"AIzaSyCnhYkubvXjU_hmVHfVdmt5rcyA1mdIi3A",
+    authDomain:"expense---tracker-9957e.firebaseapp.com",
+    projectId:"expense---tracker-9957e",
+    storageBucket:"expense---tracker-9957e.appspot.com",
+    messagingSenderId:"736738060052",
+    appId:"1:736738060052:web:7146800447fe6e47190401"
+  });
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+</script>
+<script src="theme.js"></script>
+<script>
+  let currentUser = null;
+
+  // ── Toast ──────────────────────────────────────────────────────────────────
+  function showToast(msg, type = "ok") {
+    const t = document.getElementById("toast");
+    t.textContent = msg; t.className = `toast ${type}`;
+    t.style.display = "block";
+    setTimeout(() => (t.style.display = "none"), 3000);
+  }
+  function setStatus(id, msg, type) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = msg; el.className = `status ${type}`;
+    setTimeout(() => (el.textContent = ""), 3000);
+  }
+
+  // ── Theme cards ────────────────────────────────────────────────────────────
+  function selectTheme(t) {
+    applyTheme(t);
+    document.getElementById("darkCard").classList.toggle("active",  t === "dark");
+    document.getElementById("lightCard").classList.toggle("active", t === "light");
+  }
+  function syncThemeCards() {
+    const t = getTheme();
+    document.getElementById("darkCard").classList.toggle("active",  t === "dark");
+    document.getElementById("lightCard").classList.toggle("active", t === "light");
+  }
+
+  // ── Currency grid ──────────────────────────────────────────────────────────
+  function buildCurrencyGrid() {
+    const active = getActiveCurrency();
+    const grid   = document.getElementById("currencyGrid");
+    grid.innerHTML = "";
+    Object.values(CURRENCIES).forEach(c => {
+      const div = document.createElement("div");
+      div.className = `cur-card${c.code === active ? " active" : ""}`;
+      div.innerHTML = `<span class="cur-symbol">${c.symbol}</span><div class="cur-code">${c.code}</div><div class="cur-name">${c.name}</div>`;
+      div.onclick = () => {
+        setActiveCurrency(c.code);
+        document.querySelectorAll(".cur-card").forEach(el => el.classList.remove("active"));
+        div.classList.add("active");
+        showToast(`Currency set to ${c.code} ${c.symbol}`);
+      };
+      grid.appendChild(div);
+    });
+  }
+
+  // ── Avatar ─────────────────────────────────────────────────────────────────
+  document.getElementById("avatarInput").addEventListener("change", async e => {
+    const file = e.target.files[0];
+    if (!file || !currentUser) return;
+    if (file.size > 1.5 * 1024 * 1024) { showToast("Image must be under 1.5 MB", "err"); return; }
+    const reader = new FileReader();
+    reader.onload = async ev => {
+      const b64 = ev.target.result;
+      // store as base64 in Firestore (small avatar)
+      await db.collection("users").doc(currentUser.uid).update({ avatar: b64 });
+      renderAvatar(b64, null, currentUser.uid);
+      showToast("Avatar updated ✓");
+    };
+    reader.readAsDataURL(file);
+  });
+
+  function renderAvatar(avatarB64, name, uid) {
+    const el  = document.getElementById("avatarEl");
+    const img = document.getElementById("avatarImg");
+    const ini = document.getElementById("avatarInitials");
+    if (avatarB64) {
+      img.src = avatarB64; img.style.display = "block"; ini.style.display = "none";
+    } else {
+      img.style.display = "none"; ini.style.display = "block";
+      ini.textContent = getInitials(name);
+      el.style.background = getAvatarColor(uid);
+    }
+  }
+
+  // ── Profile form ───────────────────────────────────────────────────────────
+  document.getElementById("profileForm").addEventListener("submit", async e => {
+    e.preventDefault();
+    const name  = document.getElementById("nameInput").value.trim();
+    const phone = document.getElementById("phoneInput").value.trim();
+    const bio   = document.getElementById("bioInput").value.trim();
+    if (!name) { setStatus("profileStatus","Name is required","err"); return; }
+    try {
+      await db.collection("users").doc(currentUser.uid).update({ name, phone, bio });
+      document.getElementById("profileName").textContent = name;
+      renderAvatar(null, name, currentUser.uid); // re-render initials if no avatar
+      setStatus("profileStatus","Saved ✓","ok");
+      showToast("Profile updated ✓");
+    } catch (err) { setStatus("profileStatus", err.message, "err"); }
+  });
+
+  // ── Change password ────────────────────────────────────────────────────────
+  async function changePassword() {
+    const np = document.getElementById("newPassInput").value;
+    const cp = document.getElementById("confirmPassInput").value;
+    if (!np || !cp) { setStatus("passStatus","Fill both fields","err"); return; }
+    if (np !== cp)  { setStatus("passStatus","Passwords don't match","err"); return; }
+    if (np.length < 6) { setStatus("passStatus","Min 6 characters","err"); return; }
+    try {
+      await currentUser.updatePassword(np);
+      document.getElementById("newPassInput").value = "";
+      document.getElementById("confirmPassInput").value = "";
+      setStatus("passStatus","Password updated ✓","ok");
+      showToast("Password updated ✓");
+    } catch (err) {
+      if (err.code === "auth/requires-recent-login") {
+        setStatus("passStatus","Please sign out and sign in again to change password","err");
+      } else { setStatus("passStatus", err.message, "err"); }
+    }
+  }
+
+  // ── Danger zone ────────────────────────────────────────────────────────────
+  function signOutAll() {
+    if (!confirm("Sign out now?")) return;
+    auth.signOut().then(() => location.href = "login.html");
+  }
+
+  async function deleteAllExpenses() {
+    if (!confirm("⚠️ This will permanently delete ALL your expenses. Are you sure?")) return;
+    if (!confirm("Last chance — this cannot be undone!")) return;
+    try {
+      const snap = await db.collection("users").doc(currentUser.uid).collection("expenses").get();
+      const batch = db.batch();
+      snap.docs.forEach(d => batch.delete(d.ref));
+      await batch.commit();
+      showToast(`Deleted ${snap.size} expenses ✓`);
+    } catch (err) { showToast(err.message, "err"); }
+  }
+
+  // ── Auth ───────────────────────────────────────────────────────────────────
+  auth.onAuthStateChanged(async user => {
+    if (!user) { location.href = "login.html"; return; }
+    currentUser = user;
+
+    document.getElementById("profileEmail").textContent = user.email;
+
+    const doc = await db.collection("users").doc(user.uid).get();
+    if (doc.exists) {
+      const d = doc.data();
+      document.getElementById("nameInput").value  = d.name  || "";
+      document.getElementById("phoneInput").value = d.phone || "";
+      document.getElementById("bioInput").value   = d.bio   || "";
+      document.getElementById("profileName").textContent = d.name || user.email;
+      renderAvatar(d.avatar || null, d.name || "", user.uid);
+    } else {
+      document.getElementById("profileName").textContent = user.email;
+      renderAvatar(null, user.email, user.uid);
+    }
+
+    buildCurrencyGrid();
+    syncThemeCards();
+  });
+</script>
+</body>
+</html>

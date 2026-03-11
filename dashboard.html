@@ -4,188 +4,530 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>FinTrack — Dashboard</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:        #04070f;
+      --surface:   rgba(10,16,28,0.85);
+      --surface-2: rgba(15,23,42,0.65);
+      --border:    rgba(148,163,184,0.1);
+      --accent:    #6366f1;
+      --accent-2:  #22d3ee;
+      --accent-3:  #a78bfa;
+      --green:     #10b981;
+      --red:       #f43f5e;
+      --amber:     #f59e0b;
+      --text:      #f0f4ff;
+      --text-2:    #94a3b8;
+      --text-3:    #475569;
+      --mono:      'JetBrains Mono', monospace;
+      --sans:      'Outfit', sans-serif;
+      --r:         14px;
+      --r-xl:      20px;
+    }
+    [data-theme="light"] {
+      --bg: #f1f5f9; --surface: rgba(255,255,255,0.92); --surface-2: rgba(241,245,249,0.8);
+      --border: rgba(100,116,139,0.15); --text: #0f172a; --text-2: #475569; --text-3: #94a3b8;
+    }
+    [data-theme="light"] body::before { opacity: 0.4; }
+    [data-theme="light"] .navbar { background: rgba(241,245,249,0.88); }
+    [data-theme="light"] .finput, [data-theme="light"] .c-input { background: rgba(241,245,249,0.8); border-color: rgba(100,116,139,0.2); }
+    [data-theme="light"] option { background: #fff; color: #0f172a; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--sans);
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+      transition: background .3s, color .3s;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 70% 50% at 15% 15%, rgba(99,102,241,0.13) 0%, transparent 60%),
+        radial-gradient(ellipse 55% 40% at 85% 80%, rgba(34,211,238,0.09) 0%, transparent 55%),
+        radial-gradient(ellipse 45% 55% at 50% 50%, rgba(167,139,250,0.04) 0%, transparent 70%);
+    }
+    body::after {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(148,163,184,0.022) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(148,163,184,0.022) 1px, transparent 1px);
+      background-size: 52px 52px;
+    }
+    .wrap { position: relative; z-index: 1; max-width: 1300px; margin: 0 auto; padding: 0 24px 60px; }
+
+    /* ── NAVBAR ──────────────────────────────────────── */
+    .navbar {
+      position: sticky; top: 0; z-index: 200;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 62px; padding: 0 28px;
+      background: rgba(4,7,15,0.75); backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-brand { display: flex; align-items: center; gap: 10px; }
+    .nav-logo {
+      width: 34px; height: 34px; border-radius: 10px; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--accent), var(--accent-2));
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800; font-size: 15px; color: #fff;
+      box-shadow: 0 0 18px rgba(99,102,241,0.55);
+    }
+    .nav-title { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; }
+    .nav-title span { color: var(--accent); }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
+    .nav-pill {
+      font-family: var(--mono); font-size: 0.74rem; color: var(--text-2);
+      background: var(--surface-2); border: 1px solid var(--border);
+      padding: 5px 12px; border-radius: 999px;
+    }
+    .nav-btn {
+      padding: 7px 20px; border-radius: 999px; border: none; cursor: pointer;
+      font-family: var(--sans); font-weight: 700; font-size: 0.82rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent-3));
+      color: #fff; box-shadow: 0 4px 14px rgba(99,102,241,0.35);
+      transition: all 0.2s;
+    }
+    .nav-btn:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(99,102,241,0.5); }
+    .nav-link { padding:6px 13px;border-radius:999px;font-size:.8rem;font-weight:600;color:var(--text-2);text-decoration:none;border:1px solid transparent;transition:all .18s; }
+    .nav-link:hover { border-color:rgba(99,102,241,.35);color:var(--accent);background:rgba(99,102,241,.07); }
+    .nav-link.active { background:rgba(99,102,241,.12);border-color:rgba(99,102,241,.3);color:var(--accent); }
+    .theme-btn { width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0; }
+    .theme-btn:hover { border-color:rgba(99,102,241,.4); }
+    .nav-avatar { width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;color:#fff;border:2px solid rgba(99,102,241,.4);cursor:pointer;overflow:hidden;flex-shrink:0;text-decoration:none;transition:border-color .18s; }
+    .nav-avatar:hover { border-color:var(--accent); }
+    .nav-avatar img { width:100%;height:100%;object-fit:cover; }
+
+    /* ── PAGE HEADER ─────────────────────────────────── */
+    .page-head {
+      padding: 34px 0 22px;
+      display: flex; align-items: flex-end; justify-content: space-between;
+      flex-wrap: wrap; gap: 16px;
+      animation: fadeUp 0.5s ease both;
+    }
+    .page-head h1 {
+      font-size: clamp(1.55rem, 3vw, 2rem);
+      font-weight: 800; letter-spacing: -0.03em; line-height: 1.1;
+    }
+    .page-head h1 em {
+      font-style: normal;
+      background: linear-gradient(90deg, var(--accent), var(--accent-2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .page-head p { font-size: 0.84rem; color: var(--text-2); margin-top: 5px; }
+    .controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+    .c-input {
+      padding: 8px 13px; border-radius: var(--r); font-family: var(--sans); font-size: 0.82rem;
+      background: var(--surface-2); color: var(--text); border: 1px solid var(--border); outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .c-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
+    .c-input::placeholder { color: var(--text-3); }
+    #searchInput { width: 195px; }
+    .c-btn {
+      padding: 8px 15px; border-radius: var(--r); border: 1px solid var(--border);
+      background: var(--surface-2); color: var(--text-2); font-family: var(--sans);
+      font-size: 0.8rem; font-weight: 600; cursor: pointer; transition: all 0.18s;
+    }
+    .c-btn:hover { border-color: var(--accent); color: var(--accent); background: rgba(99,102,241,0.08); }
+    .c-btn.green { border-color: rgba(16,185,129,0.2); color: var(--green); background: rgba(16,185,129,0.06); }
+    .c-btn.green:hover { background: rgba(16,185,129,0.15); }
+    .c-btn.cyan  { border-color: rgba(34,211,238,0.2); color: var(--accent-2); background: rgba(34,211,238,0.06); }
+    .c-btn.cyan:hover  { background: rgba(34,211,238,0.15); }
+
+    /* ── BANNERS ─────────────────────────────────────── */
+    .alert-banner {
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 12px; padding: 11px 16px; border-radius: var(--r);
+      margin-bottom: 10px; font-size: 0.84rem; font-weight: 500;
+      animation: slideDown 0.3s ease;
+    }
+    .alert-verify { background: rgba(251,191,36,0.07); border: 1px solid rgba(251,191,36,0.2); color: #fde68a; }
+    .alert-warn   { background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); color: #fcd34d; }
+    .alert-danger { background: rgba(244,63,94,0.08);  border: 1px solid rgba(244,63,94,0.25);  color: #fda4af; }
+    .ab-actions { display: flex; gap: 8px; flex-shrink: 0; }
+    .ab-btn {
+      padding: 5px 12px; border-radius: 8px; border: none; cursor: pointer;
+      font-family: var(--sans); font-weight: 700; font-size: 0.76rem;
+    }
+    .ab-btn-yellow { background: rgba(251,191,36,0.18); color: #fde68a; }
+    .ab-btn-indigo { background: rgba(99,102,241,0.22); color: #c7d2fe; }
+    .ab-close { background: transparent; border: none; cursor: pointer; color: inherit; opacity: 0.55; font-size: 0.95rem; }
+    .ab-close:hover { opacity: 1; }
+    #bannerMessage { margin-bottom: 8px; min-height: 0; }
+    .msg-ok  { color: var(--green); font-weight: 600; font-size: 0.84rem; }
+    .msg-err { color: var(--red);   font-weight: 600; font-size: 0.84rem; }
+
+    /* ── STATS GRID ──────────────────────────────────── */
+    .stats { display: grid; grid-template-columns: repeat(4,1fr); gap: 13px; margin-bottom: 18px; }
+    .scard {
+      padding: 20px 20px 18px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl);
+      backdrop-filter: blur(12px); position: relative; overflow: hidden;
+      transition: transform 0.22s, border-color 0.22s, box-shadow 0.22s;
+      animation: fadeUp 0.5s ease both;
+    }
+    .scard:nth-child(1){animation-delay:.05s}.scard:nth-child(2){animation-delay:.1s}
+    .scard:nth-child(3){animation-delay:.15s}.scard:nth-child(4){animation-delay:.2s}
+    .scard:hover { transform: translateY(-5px); border-color: rgba(99,102,241,0.35); box-shadow: 0 14px 40px rgba(0,0,0,0.5); }
+    .scard-bar {
+      position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: var(--r-xl) var(--r-xl) 0 0;
+    }
+    .scard.income   .scard-bar { background: linear-gradient(90deg, #6366f1, #a78bfa); }
+    .scard.budget   .scard-bar { background: linear-gradient(90deg, #22d3ee, #6366f1); }
+    .scard.spent    .scard-bar { background: linear-gradient(90deg, #f43f5e, #fb923c); }
+    .scard.remaining .scard-bar { background: linear-gradient(90deg, #10b981, #22d3ee); }
+    .scard-icon {
+      width: 36px; height: 36px; border-radius: 11px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 15px; margin-bottom: 12px;
+    }
+    .scard.income   .scard-icon { background: rgba(99,102,241,0.14); }
+    .scard.budget   .scard-icon { background: rgba(34,211,238,0.12); }
+    .scard.spent    .scard-icon { background: rgba(244,63,94,0.12);  }
+    .scard.remaining .scard-icon { background: rgba(16,185,129,0.12); }
+    .scard-label {
+      font-size: 0.69rem; color: var(--text-2); text-transform: uppercase;
+      letter-spacing: 0.09em; font-weight: 700; margin-bottom: 5px;
+    }
+    .scard-val {
+      font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em;
+      font-family: var(--mono); line-height: 1;
+    }
+    .scard-val.pos { color: var(--green); }
+    .scard-val.neg { color: var(--red); }
+    /* Budget ring */
+    .budget-ring { position: absolute; right: 16px; top: 16px; }
+    .ring-svg { transform: rotate(-90deg); }
+    .ring-bg   { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 3; }
+    .ring-fg   { fill: none; stroke-width: 3; stroke-linecap: round; transition: stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1); }
+
+    /* ── MAIN GRID ───────────────────────────────────── */
+    .mgrid { display: grid; grid-template-columns: 360px 1fr; gap: 16px; align-items: start; }
+
+    /* ── PANEL ───────────────────────────────────────── */
+    .panel {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-xl);
+      backdrop-filter: blur(12px); overflow: hidden;
+      transition: border-color 0.22s;
+      animation: fadeUp 0.5s ease both;
+    }
+    .panel:hover { border-color: rgba(148,163,184,0.18); }
+    .phead {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 18px 20px 0;
+    }
+    .ptitle {
+      font-size: 0.72rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--text-2);
+    }
+    .pbody { padding: 14px 20px 20px; }
+
+    /* ── FORMS ───────────────────────────────────────── */
+    .fgrid { display: grid; gap: 11px; }
+    .flabel {
+      font-size: 0.72rem; font-weight: 700; color: var(--text-2);
+      text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 5px; display: block;
+    }
+    .finput {
+      width: 100%; padding: 9px 12px; border-radius: var(--r);
+      background: rgba(4,7,15,0.7); border: 1px solid var(--border);
+      color: var(--text); font-family: var(--sans); font-size: 0.86rem; outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .finput:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.12); }
+    .finput::placeholder { color: var(--text-3); }
+    select.finput { appearance: none; cursor: pointer; }
+    option { background: #0a1020; }
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .sbtn {
+      width: 100%; padding: 11px; border-radius: var(--r); border: none; cursor: pointer;
+      font-family: var(--sans); font-weight: 700; font-size: 0.88rem;
+      background: linear-gradient(135deg, var(--accent), var(--accent-3));
+      color: #fff; box-shadow: 0 6px 20px rgba(99,102,241,0.3);
+      transition: all 0.2s; position: relative; overflow: hidden;
+    }
+    .sbtn:hover { transform: translateY(-2px); box-shadow: 0 10px 28px rgba(99,102,241,0.5); }
+    .sbtn:active { transform: translateY(0); }
+    #formMsg { font-size: 0.8rem; font-weight: 600; min-height: 18px; }
+
+    /* ── CHART ───────────────────────────────────────── */
+    .chart-wrap { padding: 12px 10px 10px; }
+    .ctoggle {
+      padding: 5px 11px; border-radius: 8px; border: 1px solid var(--border);
+      background: rgba(4,7,15,0.5); color: var(--text-2); font-family: var(--sans);
+      font-size: 0.72rem; font-weight: 600; cursor: pointer; transition: all 0.18s;
+    }
+    .ctoggle:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── TABLE ───────────────────────────────────────── */
+    .tscroll { max-height: 340px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(99,102,241,0.25) transparent; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    thead tr { border-bottom: 1px solid var(--border); }
+    th {
+      padding: 10px 12px; text-align: left;
+      font-size: 0.67rem; font-weight: 700; color: var(--text-3);
+      text-transform: uppercase; letter-spacing: 0.09em; white-space: nowrap;
+    }
+    td { padding: 11px 12px; border-bottom: 1px solid rgba(148,163,184,0.05); vertical-align: middle; }
+    tbody tr { transition: background 0.14s; }
+    tbody tr:hover { background: rgba(99,102,241,0.05); }
+    tbody tr:last-child td { border-bottom: none; }
+    .td-title  { font-weight: 600; }
+    .td-amt    { font-family: var(--mono); font-weight: 600; font-size: 0.84rem; }
+    .td-date   { color: var(--text-2); font-family: var(--mono); font-size: 0.76rem; }
+    .cat-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 3px 9px; border-radius: 999px; font-size: 0.69rem; font-weight: 700;
+      background: color-mix(in srgb, var(--c) 13%, transparent);
+      color: var(--c); border: 1px solid color-mix(in srgb, var(--c) 27%, transparent);
+    }
+    .cdot { width: 5px; height: 5px; border-radius: 50%; background: var(--c); flex-shrink: 0; }
+    .row-acts { display: flex; gap: 5px; opacity: 0; transition: opacity 0.14s; }
+    tbody tr:hover .row-acts { opacity: 1; }
+    .rbtn {
+      padding: 4px 10px; border-radius: 7px; border: none; cursor: pointer;
+      font-family: var(--sans); font-size: 0.7rem; font-weight: 700; transition: all 0.15s;
+    }
+    .rbtn-edit   { background: rgba(99,102,241,0.14); color: #a5b4fc; }
+    .rbtn-edit:hover   { background: rgba(99,102,241,0.32); color: #fff; }
+    .rbtn-del    { background: rgba(244,63,94,0.12);   color: #fda4af; }
+    .rbtn-del:hover    { background: rgba(244,63,94,0.3);   color: #fff; }
+    .empty-row td { text-align: center; padding: 36px; color: var(--text-3); font-size: 0.85rem; }
+
+    /* inline edit */
+    .edit-row { display: flex; gap: 7px; align-items: center; flex-wrap: wrap; padding: 8px 12px; }
+    .edit-row input, .edit-row select {
+      padding: 6px 9px; border-radius: 9px; border: 1px solid var(--border);
+      background: rgba(4,7,15,0.8); color: var(--text);
+      font-family: var(--sans); font-size: 0.79rem; outline: none;
+    }
+    .edit-row input:focus, .edit-row select:focus { border-color: var(--accent); }
+    .edit-save   { padding:6px 14px;border-radius:8px;border:none;cursor:pointer;font-family:var(--sans);font-weight:700;font-size:0.77rem;background:linear-gradient(135deg,var(--accent),var(--accent-3));color:#fff; }
+    .edit-cancel { padding:6px 12px;border-radius:8px;border:none;cursor:pointer;font-family:var(--sans);font-weight:600;font-size:0.77rem;background:rgba(148,163,184,0.08);color:var(--text-2); }
+
+    /* ── ANIMATIONS ──────────────────────────────────── */
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(16px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    @keyframes slideDown {
+      from { opacity:0; transform:translateY(-8px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+
+    /* ── RESPONSIVE ──────────────────────────────────── */
+    @media (max-width:1050px) { .mgrid { grid-template-columns:1fr; } .stats { grid-template-columns:repeat(2,1fr); } }
+    @media (max-width:600px)  {
+      .wrap { padding:0 12px 40px; } .stats { grid-template-columns:1fr 1fr; }
+      .page-head { flex-direction:column; align-items:flex-start; }
+      .controls { width:100%; } #searchInput { width:100%; }
+      .navbar { padding:0 14px; } .nav-pill { display:none; }
+      .two-col { grid-template-columns:1fr; }
+    }
+  </style>
+  <script src="theme.js"></script>
 </head>
 <body>
-  <header class="navbar glass-card">
-    <div class="brand">
-      <span class="logo-cube"></span>
-      <span class="brand-text">FinTrack</span>
-    </div>
-    <div style="display:flex;align-items:center;gap:12px;">
-      <div id="userEmail" style="color:var(--text-soft);font-size:0.85rem;"></div>
-      <button id="logoutBtn" class="btn-primary" style="padding:6px 14px;width:auto;">Logout</button>
-    </div>
-  </header>
 
-  <main class="app" style="padding-top:18px;">
-
-    <!-- Top row: title + controls -->
-    <div class="top-row">
-      <div style="flex:1">
-        <h2 style="margin:0;color:#fff;font-size:1.35rem;">Dashboard</h2>
-        <div class="small-note">Track expenses, set budgets, and view category charts.</div>
-      </div>
-      <div id="controls">
-        <input id="searchInput" type="text" placeholder="🔍 Search expenses…" class="search-input" />
-        <select id="filterMonth" title="Filter by month"></select>
-        <button id="exportCsv"  class="ctrl-btn">⬇ CSV</button>
-        <button id="exportPdf"  class="ctrl-btn ctrl-btn-pdf">🖨 PDF</button>
-      </div>
+  <nav class="navbar">
+    <div class="nav-brand">
+      <div class="nav-logo">F</div>
+      <span class="nav-title">Fin<span>Track</span></span>
     </div>
+    <div class="nav-right">
+      <a href="dashboard.html" class="nav-link active">Dashboard</a>
+      <a href="analytics.html" class="nav-link">Analytics</a>
+      <a href="profile.html"   class="nav-link">Profile</a>
+      <button id="themeToggle" class="theme-btn" title="Toggle theme">🌙</button>
+      <a href="profile.html" id="navAvatar" class="nav-avatar" style="background:#6366f1">?</a>
+      <button class="nav-btn" id="logoutBtn">Sign out</button>
+    </div>
+  </nav>
 
-    <!-- Verification Banner -->
-    <div id="verificationBanner" style="display:none;" class="verification-banner">
-      <div class="msg">
-        Your email is not verified. Please verify to access all features.
+  <div class="wrap">
+
+    <!-- PAGE HEADER -->
+    <div class="page-head">
+      <div>
+        <h1>Your <em>Finance</em> Dashboard</h1>
+        <p>Real-time expense tracking — all data is private to your account</p>
       </div>
-      <div style="display:flex;gap:8px;align-items:center;">
-        <button id="resendVerificationBtn" class="vbanner-btn">Resend verification</button>
-        <button id="refreshAuthBtn"        class="vbanner-btn vbanner-btn-blue">I verified — Refresh</button>
+      <div class="controls">
+        <input id="searchInput" type="text" placeholder="⌕  Search…" class="c-input" />
+        <select id="filterMonth" class="c-input"></select>
+        <button id="exportCsv" class="c-btn green">↓ CSV</button>
+        <button id="exportPdf" class="c-btn cyan">⎙ PDF</button>
       </div>
     </div>
 
-    <!-- Budget Alert Banner -->
-    <div id="budgetAlertBox" class="budget-alert" style="display:none;">
+    <!-- BANNERS -->
+    <div id="verificationBanner" class="alert-banner alert-verify" style="display:none;">
+      <span>📧 Your email isn't verified yet.</span>
+      <div class="ab-actions">
+        <button id="resendVerificationBtn" class="ab-btn ab-btn-yellow">Resend</button>
+        <button id="refreshAuthBtn"        class="ab-btn ab-btn-indigo">I verified ✓</button>
+      </div>
+    </div>
+    <div id="budgetAlertBox" class="alert-banner" style="display:none;">
       <span id="budgetAlertMsg"></span>
-      <button onclick="document.getElementById('budgetAlertBox').style.display='none'" class="alert-close">✕</button>
+      <button class="ab-close" onclick="this.closest('.alert-banner').style.display='none'">✕</button>
+    </div>
+    <div id="bannerMessage"></div>
+
+    <!-- STATS -->
+    <div class="stats">
+      <div class="scard income">
+        <div class="scard-bar"></div>
+        <div class="scard-icon">💰</div>
+        <div class="scard-label">Monthly Income</div>
+        <div class="scard-val" id="incomeValue">₹0</div>
+      </div>
+      <div class="scard budget">
+        <div class="scard-bar"></div>
+        <div class="scard-icon">🎯</div>
+        <div class="scard-label">Budget Limit</div>
+        <div class="scard-val" id="budgetValue">₹0</div>
+        <div class="budget-ring">
+          <svg class="ring-svg" width="42" height="42" viewBox="0 0 42 42">
+            <circle class="ring-bg" cx="21" cy="21" r="17"/>
+            <circle class="ring-fg" cx="21" cy="21" r="17" id="budgetRing"
+              stroke="url(#rg)" stroke-dasharray="106.8" stroke-dashoffset="106.8"/>
+            <defs>
+              <linearGradient id="rg" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%"   stop-color="#6366f1"/>
+                <stop offset="100%" stop-color="#22d3ee"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+      </div>
+      <div class="scard spent">
+        <div class="scard-bar"></div>
+        <div class="scard-icon">📤</div>
+        <div class="scard-label">Total Spent</div>
+        <div class="scard-val" id="spentValue">₹0</div>
+      </div>
+      <div class="scard remaining">
+        <div class="scard-bar"></div>
+        <div class="scard-icon">🏦</div>
+        <div class="scard-label">Remaining</div>
+        <div class="scard-val pos" id="remainingValue">₹0</div>
+      </div>
     </div>
 
-    <div id="bannerMessage" style="margin-bottom:10px;"></div>
+    <!-- MAIN GRID -->
+    <div class="mgrid">
 
-    <div class="main-grid">
-      <!-- ── LEFT PANEL ─────────────────────────────────────────────────── -->
-      <section class="left-panel">
-
-        <!-- Summary Cards -->
-        <div class="summary-grid">
-          <div class="summary-card glass-card card-3d">
-            <h3>Monthly Income</h3>
-            <p class="summary-value" id="incomeValue">₹0</p>
-          </div>
-          <div class="summary-card glass-card card-3d">
-            <h3>Budget Limit</h3>
-            <p class="summary-value" id="budgetValue">₹0</p>
-          </div>
-          <div class="summary-card glass-card card-3d">
-            <h3>Total Spent</h3>
-            <p class="summary-value" id="spentValue">₹0</p>
-          </div>
-          <div class="summary-card glass-card card-3d">
-            <h3>Remaining</h3>
-            <p class="summary-value positive" id="remainingValue">₹0</p>
+      <!-- LEFT: FORMS -->
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <!-- Budget -->
+        <div class="panel" style="animation-delay:.25s">
+          <div class="phead"><span class="ptitle">Set Budget</span><span>🎯</span></div>
+          <div class="pbody">
+            <form id="budgetForm" class="fgrid" novalidate>
+              <div>
+                <label class="flabel" for="incomeInput">Monthly Income (₹)</label>
+                <input id="incomeInput" type="number" min="0" placeholder="50,000" class="finput" />
+              </div>
+              <div>
+                <label class="flabel" for="budgetInput">Budget Limit (₹)</label>
+                <input id="budgetInput" type="number" min="0" placeholder="30,000" class="finput" />
+              </div>
+              <button type="submit" class="sbtn">Save Budget</button>
+            </form>
           </div>
         </div>
 
-        <!-- Budget Form -->
-        <div class="glass-card card-3d form-card">
-          <h2>Set Monthly Budget</h2>
-          <form id="budgetForm">
-            <div class="form-group">
-              <label for="incomeInput">Monthly Income (₹)</label>
-              <input type="number" id="incomeInput" min="0" placeholder="e.g. 50000" />
-            </div>
-            <div class="form-group">
-              <label for="budgetInput">Budget Limit (₹)</label>
-              <input type="number" id="budgetInput" min="0" placeholder="e.g. 30000" />
-            </div>
-            <button type="submit" class="btn-primary">Save Budget</button>
-          </form>
+        <!-- Add Expense -->
+        <div class="panel" style="animation-delay:.3s">
+          <div class="phead"><span class="ptitle">Add Expense</span><span>➕</span></div>
+          <div class="pbody">
+            <form id="expenseForm" class="fgrid" novalidate>
+              <div>
+                <label class="flabel" for="titleInput">Title</label>
+                <input id="titleInput" type="text" placeholder="e.g. Grocery run" class="finput" required />
+              </div>
+              <div class="two-col">
+                <div>
+                  <label class="flabel" for="amountInput">Amount (₹)</label>
+                  <input id="amountInput" type="number" min="0" placeholder="1,200" class="finput" required />
+                </div>
+                <div>
+                  <label class="flabel" for="dateInput">Date</label>
+                  <input id="dateInput" type="date" class="finput" required />
+                </div>
+              </div>
+              <div>
+                <label class="flabel" for="categoryInput">Category</label>
+                <select id="categoryInput" class="finput">
+                  <option>Food</option><option>Transport</option><option>Shopping</option>
+                  <option>Bills</option><option>Entertainment</option><option>Other</option>
+                </select>
+              </div>
+              <button type="submit" class="sbtn">Add Expense</button>
+              <div id="formMsg"></div>
+            </form>
+          </div>
         </div>
+      </div>
 
-        <!-- Expense Form -->
-        <div class="glass-card card-3d form-card">
-          <h2>Add Expense</h2>
-          <form id="expenseForm">
-            <div class="form-group">
-              <label for="titleInput">Title</label>
-              <input type="text" id="titleInput" placeholder="e.g. Groceries" required />
-            </div>
-            <div class="form-group">
-              <label for="amountInput">Amount (₹)</label>
-              <input type="number" id="amountInput" min="1" required placeholder="e.g. 500" />
-            </div>
-            <div class="form-group">
-              <label for="categoryInput">Category</label>
-              <select id="categoryInput">
-                <option>Food</option>
-                <option>Transport</option>
-                <option>Shopping</option>
-                <option>Bills</option>
-                <option>Entertainment</option>
-                <option>Other</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label for="dateInput">Date</label>
-              <input type="date" id="dateInput" />
-            </div>
-            <button type="submit" class="btn-primary">Add Expense</button>
-            <div id="formMsg" style="margin-top:8px;font-size:0.85rem;"></div>
-          </form>
-        </div>
-
-      </section>
-
-      <!-- ── RIGHT PANEL ────────────────────────────────────────────────── -->
-      <section class="right-panel">
-
+      <!-- RIGHT: CHART + TABLE -->
+      <div style="display:flex;flex-direction:column;gap:14px;">
         <!-- Chart -->
-        <div class="glass-card card-3d chart-card">
-          <div class="chart-header">
-            <h2>Spending by Category</h2>
-            <button id="toggleChart" class="ctrl-btn" style="font-size:0.75rem;padding:5px 10px;">Switch to Bar</button>
+        <div class="panel" style="animation-delay:.35s">
+          <div class="phead">
+            <span class="ptitle">Spending by Category</span>
+            <button id="toggleChart" class="ctoggle">Switch to Bar</button>
           </div>
-          <canvas id="expenseChart"></canvas>
+          <div class="chart-wrap">
+            <canvas id="expenseChart" style="max-height:255px;"></canvas>
+          </div>
         </div>
 
         <!-- Table -->
-        <div class="glass-card card-3d table-card">
-          <div class="table-header">
-            <h2>Recent Expenses</h2>
+        <div class="panel" style="animation-delay:.4s">
+          <div class="phead" style="padding-bottom:12px;">
+            <span class="ptitle">Recent Expenses</span>
+            <span id="expenseCount" style="font-size:0.72rem;color:var(--text-3);font-family:var(--mono);">0 entries</span>
           </div>
-          <div class="table-wrapper">
+          <div class="tscroll">
             <table>
               <thead>
-                <tr>
-                  <th>Title</th>
-                  <th>Category</th>
-                  <th>Amount</th>
-                  <th>Date</th>
-                  <th>Actions</th>
-                </tr>
+                <tr><th>Title</th><th>Category</th><th>Amount</th><th>Date</th><th></th></tr>
               </thead>
               <tbody id="expenseTableBody"></tbody>
             </table>
           </div>
         </div>
+      </div>
 
-      </section>
     </div>
-  </main>
+  </div><!-- /wrap -->
 
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <!-- Firebase compat -->
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
   <script>
-    const firebaseConfig = {
+    firebase.initializeApp({
       apiKey: "AIzaSyCnhYkubvXjU_hmVHfVdmt5rcyA1mdIi3A",
       authDomain: "expense---tracker-9957e.firebaseapp.com",
       projectId: "expense---tracker-9957e",
       storageBucket: "expense---tracker-9957e.appspot.com",
       messagingSenderId: "736738060052",
       appId: "1:736738060052:web:7146800447fe6e47190401"
-    };
-    firebase.initializeApp(firebaseConfig);
+    });
     const auth = firebase.auth();
     const db   = firebase.firestore();
   </script>
-
-  <!-- App logic -->
+  <span id="userEmail" style="display:none"></span>
   <script src="app.js"></script>
 </body>
 </html>

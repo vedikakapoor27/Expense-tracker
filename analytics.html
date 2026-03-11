@@ -1,0 +1,660 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>FinTrack — Analytics</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <script src="theme.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#04070f; --surface:rgba(10,16,28,.88); --surface-2:rgba(15,23,42,.65);
+      --border:rgba(148,163,184,.1); --accent:#6366f1; --a2:#22d3ee; --a3:#a78bfa;
+      --green:#10b981; --red:#f43f5e; --amber:#f59e0b;
+      --text:#f0f4ff; --text-2:#94a3b8; --text-3:#475569;
+      --mono:'JetBrains Mono',monospace; --sans:'Outfit',sans-serif;
+      --r:14px; --r-xl:20px;
+    }
+    [data-theme="light"]{
+      --bg:#f1f5f9; --surface:rgba(255,255,255,.92); --surface-2:rgba(241,245,249,.8);
+      --border:rgba(100,116,139,.15); --text:#0f172a; --text-2:#475569; --text-3:#94a3b8;
+    }
+    [data-theme="light"] body::before{opacity:.4}
+    [data-theme="light"] .navbar{background:rgba(241,245,249,.88)}
+    [data-theme="light"] .finput{background:rgba(241,245,249,.8)}
+    [data-theme="light"] option{background:#fff;color:#0f172a}
+
+    html{scroll-behavior:smooth}
+    body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;transition:background .3s,color .3s}
+    body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+      background:radial-gradient(ellipse 70% 50% at 15% 15%,rgba(99,102,241,.13) 0%,transparent 60%),
+                 radial-gradient(ellipse 55% 40% at 85% 80%,rgba(34,211,238,.09) 0%,transparent 55%),
+                 radial-gradient(ellipse 40% 60% at 50% 50%,rgba(167,139,250,.04) 0%,transparent 70%)}
+    body::after{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+      background-image:linear-gradient(rgba(148,163,184,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(148,163,184,.022) 1px,transparent 1px);
+      background-size:52px 52px}
+    .wrap{position:relative;z-index:1;max-width:1300px;margin:0 auto;padding:0 24px 60px}
+
+    /* ── NAVBAR ── */
+    .navbar{position:sticky;top:0;z-index:200;display:flex;align-items:center;justify-content:space-between;height:62px;padding:0 28px;background:rgba(4,7,15,.75);backdrop-filter:blur(20px);border-bottom:1px solid var(--border)}
+    .nav-brand{display:flex;align-items:center;gap:10px}
+    .nav-logo{width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--accent),var(--a2));display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#fff;box-shadow:0 0 18px rgba(99,102,241,.5);flex-shrink:0}
+    .nav-title{font-size:1.05rem;font-weight:800;letter-spacing:-.02em}
+    .nav-title span{color:var(--accent)}
+    .nav-right{display:flex;align-items:center;gap:10px}
+    .nav-link{padding:6px 13px;border-radius:999px;font-size:.8rem;font-weight:600;color:var(--text-2);text-decoration:none;border:1px solid transparent;transition:all .18s}
+    .nav-link:hover{border-color:rgba(99,102,241,.35);color:var(--accent);background:rgba(99,102,241,.07)}
+    .nav-link.active{background:rgba(99,102,241,.12);border-color:rgba(99,102,241,.3);color:var(--accent)}
+    .theme-btn{width:34px;height:34px;border-radius:10px;border:1px solid var(--border);background:var(--surface-2);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .18s;flex-shrink:0}
+    .theme-btn:hover{border-color:rgba(99,102,241,.4)}
+    .nav-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:800;color:#fff;border:2px solid rgba(99,102,241,.4);cursor:pointer;overflow:hidden;flex-shrink:0;text-decoration:none;transition:border-color .18s}
+    .nav-avatar:hover{border-color:var(--accent)}
+    .nav-avatar img{width:100%;height:100%;object-fit:cover}
+
+    /* ── PAGE HEADER ── */
+    .page-head{padding:32px 0 22px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:16px;animation:fadeUp .5s ease both}
+    .page-head h1{font-size:clamp(1.55rem,3vw,2rem);font-weight:800;letter-spacing:-.03em;line-height:1.1}
+    .page-head h1 em{font-style:normal;background:linear-gradient(90deg,var(--accent),var(--a2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+    .page-head p{color:var(--text-2);font-size:.84rem;margin-top:5px}
+    .year-selector{display:flex;align-items:center;gap:8px}
+    .year-btn{width:32px;height:32px;border-radius:9px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-2);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all .18s}
+    .year-btn:hover{border-color:var(--accent);color:var(--accent)}
+    .year-label{font-family:var(--mono);font-size:.9rem;font-weight:700;min-width:48px;text-align:center}
+
+    /* ── STATS ROW ── */
+    .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:13px;margin-bottom:18px}
+    .scard{padding:18px 20px 16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);backdrop-filter:blur(12px);position:relative;overflow:hidden;transition:transform .22s,border-color .22s,box-shadow .22s;animation:fadeUp .5s ease both}
+    .scard:nth-child(1){animation-delay:.05s}.scard:nth-child(2){animation-delay:.1s}.scard:nth-child(3){animation-delay:.15s}.scard:nth-child(4){animation-delay:.2s}
+    .scard:hover{transform:translateY(-4px);border-color:rgba(99,102,241,.35);box-shadow:0 14px 40px rgba(0,0,0,.45)}
+    .scard-bar{position:absolute;top:0;left:0;right:0;height:3px;border-radius:var(--r-xl) var(--r-xl) 0 0}
+    .scard.s1 .scard-bar{background:linear-gradient(90deg,#6366f1,#a78bfa)}
+    .scard.s2 .scard-bar{background:linear-gradient(90deg,#22d3ee,#6366f1)}
+    .scard.s3 .scard-bar{background:linear-gradient(90deg,#10b981,#22d3ee)}
+    .scard.s4 .scard-bar{background:linear-gradient(90deg,#f59e0b,#f97316)}
+    .scard-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px;margin-bottom:10px}
+    .scard.s1 .scard-icon{background:rgba(99,102,241,.14)}.scard.s2 .scard-icon{background:rgba(34,211,238,.12)}
+    .scard.s3 .scard-icon{background:rgba(16,185,129,.12)}.scard.s4 .scard-icon{background:rgba(245,158,11,.12)}
+    .scard-label{font-size:.69rem;color:var(--text-2);text-transform:uppercase;letter-spacing:.09em;font-weight:700;margin-bottom:4px}
+    .scard-val{font-size:1.4rem;font-weight:800;letter-spacing:-.02em;font-family:var(--mono);line-height:1}
+    .scard-sub{font-size:.72rem;color:var(--text-3);margin-top:4px;font-family:var(--mono)}
+
+    /* ── GRID ── */
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+    .grid-full{margin-bottom:16px}
+
+    /* ── PANEL ── */
+    .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-xl);backdrop-filter:blur(12px);overflow:hidden;transition:border-color .22s;animation:fadeUp .5s ease both}
+    .panel:hover{border-color:rgba(148,163,184,.18)}
+    .phead{display:flex;align-items:center;justify-content:space-between;padding:18px 22px 0}
+    .phead-left{display:flex;align-items:center;gap:10px}
+    .phead-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+    .ptitle{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text-2)}
+    .pbody{padding:16px 22px 22px}
+    .chart-wrap{padding:14px 8px 10px;position:relative}
+
+    /* ── CATEGORY BUDGET SECTION ── */
+    .cat-budget-grid{display:grid;gap:14px}
+    .cat-budget-item{display:grid;grid-template-columns:1fr auto;align-items:center;gap:12px}
+    .cat-budget-left{display:flex;flex-direction:column;gap:6px}
+    .cat-budget-top{display:flex;align-items:center;justify-content:space-between}
+    .cat-name{display:flex;align-items:center;gap:7px;font-size:.84rem;font-weight:600}
+    .cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    .cat-amounts{font-size:.74rem;font-family:var(--mono);color:var(--text-2)}
+    .cat-amounts span{color:var(--text)}
+    .progress-bar{height:6px;border-radius:999px;background:rgba(148,163,184,.1);overflow:hidden}
+    .progress-fill{height:100%;border-radius:999px;transition:width 1s cubic-bezier(.4,0,.2,1)}
+    .cat-budget-input{width:110px;padding:7px 10px;border-radius:10px;border:1px solid var(--border);background:rgba(4,7,15,.6);color:var(--text);font-family:var(--mono);font-size:.8rem;outline:none;text-align:right;transition:border-color .2s}
+    .cat-budget-input:focus{border-color:var(--accent)}
+    [data-theme="light"] .cat-budget-input{background:rgba(241,245,249,.8)}
+    .save-cat-btn{margin-top:16px;padding:9px 22px;border-radius:var(--r);border:none;cursor:pointer;font-family:var(--sans);font-weight:700;font-size:.84rem;background:linear-gradient(135deg,var(--accent),var(--a3));color:#fff;box-shadow:0 4px 16px rgba(99,102,241,.3);transition:all .2s}
+    .save-cat-btn:hover{transform:translateY(-1px);box-shadow:0 8px 22px rgba(99,102,241,.45)}
+
+    /* ── YOY TABLE ── */
+    .yoy-table{width:100%;border-collapse:collapse;font-size:.83rem}
+    .yoy-table thead tr{border-bottom:1px solid var(--border)}
+    .yoy-table th{padding:9px 12px;text-align:left;font-size:.67rem;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.09em}
+    .yoy-table td{padding:10px 12px;border-bottom:1px solid rgba(148,163,184,.05);font-family:var(--mono);font-size:.82rem}
+    .yoy-table tbody tr{transition:background .14s}
+    .yoy-table tbody tr:hover{background:rgba(99,102,241,.05)}
+    .yoy-table tbody tr:last-child td{border-bottom:none}
+    .change-up{color:var(--red)}.change-down{color:var(--green)}.change-same{color:var(--text-3)}
+
+    /* ── INSIGHT CARDS ── */
+    .insights-row{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:16px}
+    .insight-card{padding:16px 18px;border-radius:var(--r-xl);border:1px solid var(--border);background:var(--surface);animation:fadeUp .5s ease both}
+    .insight-card:nth-child(1){animation-delay:.05s}.insight-card:nth-child(2){animation-delay:.1s}.insight-card:nth-child(3){animation-delay:.15s}
+    .insight-label{font-size:.69rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--text-3);margin-bottom:6px}
+    .insight-val{font-size:1.05rem;font-weight:700;font-family:var(--mono)}
+    .insight-desc{font-size:.74rem;color:var(--text-2);margin-top:4px}
+
+    /* ── EMPTY ── */
+    .empty-chart{display:flex;flex-direction:column;align-items:center;justify-content:center;height:200px;color:var(--text-3);font-size:.88rem;gap:8px}
+    .empty-chart span{font-size:2rem;opacity:.4}
+
+    /* ── TOAST ── */
+    .toast{position:fixed;bottom:24px;right:24px;z-index:999;padding:11px 18px;border-radius:var(--r);font-size:.84rem;font-weight:600;display:none;animation:slideUp .3s ease}
+    .toast.ok{background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.35);color:var(--green)}
+    .toast.err{background:rgba(244,63,94,.12);border:1px solid rgba(244,63,94,.3);color:#fda4af}
+
+    @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes slideUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+    @media(max-width:1050px){.grid-2{grid-template-columns:1fr}.stats-row{grid-template-columns:repeat(2,1fr)}.insights-row{grid-template-columns:1fr 1fr}}
+    @media(max-width:600px){.wrap{padding:0 12px 40px}.stats-row{grid-template-columns:1fr 1fr}.insights-row{grid-template-columns:1fr}.page-head{flex-direction:column;align-items:flex-start}.navbar{padding:0 14px}}
+  </style>
+</head>
+<body>
+
+<nav class="navbar">
+  <div class="nav-brand">
+    <div class="nav-logo">F</div>
+    <span class="nav-title">Fin<span>Track</span></span>
+  </div>
+  <div class="nav-right">
+    <a href="dashboard.html" class="nav-link">Dashboard</a>
+    <a href="analytics.html" class="nav-link active">Analytics</a>
+    <a href="profile.html"   class="nav-link">Profile</a>
+    <button id="themeToggle" class="theme-btn" title="Toggle theme">🌙</button>
+    <a href="profile.html" id="navAvatar" class="nav-avatar" style="background:#6366f1">?</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+  <!-- PAGE HEADER -->
+  <div class="page-head">
+    <div>
+      <h1>Spending <em>Analytics</em></h1>
+      <p>Trends, insights and category breakdowns for your expenses</p>
+    </div>
+    <div class="year-selector">
+      <button class="year-btn" id="yearPrev">‹</button>
+      <span class="year-label" id="yearLabel">2025</span>
+      <button class="year-btn" id="yearNext">›</button>
+    </div>
+  </div>
+
+  <!-- YEAR STATS -->
+  <div class="stats-row">
+    <div class="scard s1">
+      <div class="scard-bar"></div>
+      <div class="scard-icon">📅</div>
+      <div class="scard-label">Total This Year</div>
+      <div class="scard-val" id="statYearTotal">—</div>
+      <div class="scard-sub" id="statYearCount">0 expenses</div>
+    </div>
+    <div class="scard s2">
+      <div class="scard-bar"></div>
+      <div class="scard-icon">📆</div>
+      <div class="scard-label">Monthly Average</div>
+      <div class="scard-val" id="statMonthAvg">—</div>
+      <div class="scard-sub">per month</div>
+    </div>
+    <div class="scard s3">
+      <div class="scard-bar"></div>
+      <div class="scard-icon">🏆</div>
+      <div class="scard-label">Highest Month</div>
+      <div class="scard-val" id="statHighMonth">—</div>
+      <div class="scard-sub" id="statHighMonthName">—</div>
+    </div>
+    <div class="scard s4">
+      <div class="scard-bar"></div>
+      <div class="scard-icon">🔥</div>
+      <div class="scard-label">Top Category</div>
+      <div class="scard-val" id="statTopCat">—</div>
+      <div class="scard-sub" id="statTopCatAmt">—</div>
+    </div>
+  </div>
+
+  <!-- INSIGHTS -->
+  <div class="insights-row">
+    <div class="insight-card">
+      <div class="insight-label">Biggest Single Expense</div>
+      <div class="insight-val" id="insightBiggest">—</div>
+      <div class="insight-desc" id="insightBiggestDesc">—</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-label">Most Active Month</div>
+      <div class="insight-val" id="insightActiveMonth">—</div>
+      <div class="insight-desc" id="insightActiveMonthDesc">—</div>
+    </div>
+    <div class="insight-card">
+      <div class="insight-label">vs Previous Year</div>
+      <div class="insight-val" id="insightYoY">—</div>
+      <div class="insight-desc" id="insightYoYDesc">—</div>
+    </div>
+  </div>
+
+  <!-- TREND CHART (full width) -->
+  <div class="panel grid-full" style="animation-delay:.25s">
+    <div class="phead">
+      <div class="phead-left">
+        <div class="phead-icon" style="background:rgba(99,102,241,.14)">📈</div>
+        <span class="ptitle">Monthly Spending Trend</span>
+      </div>
+      <span id="trendLabel" style="font-size:.74rem;color:var(--text-3);font-family:var(--mono)"></span>
+    </div>
+    <div class="chart-wrap" style="padding:18px 12px 14px">
+      <canvas id="trendChart" style="max-height:280px"></canvas>
+    </div>
+  </div>
+
+  <!-- CATEGORY DONUT + YOY BAR -->
+  <div class="grid-2">
+
+    <div class="panel" style="animation-delay:.3s">
+      <div class="phead">
+        <div class="phead-left">
+          <div class="phead-icon" style="background:rgba(34,211,238,.12)">🍩</div>
+          <span class="ptitle">Category Breakdown</span>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="catChart" style="max-height:260px"></canvas>
+      </div>
+    </div>
+
+    <div class="panel" style="animation-delay:.35s">
+      <div class="phead">
+        <div class="phead-left">
+          <div class="phead-icon" style="background:rgba(167,139,250,.14)">📊</div>
+          <span class="ptitle">Year-over-Year Comparison</span>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="yoyChart" style="max-height:260px"></canvas>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CATEGORY BUDGETS + YOY TABLE -->
+  <div class="grid-2">
+
+    <div class="panel" style="animation-delay:.4s">
+      <div class="phead">
+        <div class="phead-left">
+          <div class="phead-icon" style="background:rgba(16,185,129,.12)">🎯</div>
+          <span class="ptitle">Category Budget Limits</span>
+        </div>
+      </div>
+      <div class="pbody">
+        <div class="cat-budget-grid" id="catBudgetGrid">
+          <!-- filled by JS -->
+        </div>
+        <button class="save-cat-btn" onclick="saveCategoryBudgets()">Save Category Budgets</button>
+        <div id="catBudgetStatus" style="font-size:.8rem;font-weight:600;margin-top:10px;min-height:18px"></div>
+      </div>
+    </div>
+
+    <div class="panel" style="animation-delay:.45s">
+      <div class="phead">
+        <div class="phead-left">
+          <div class="phead-icon" style="background:rgba(245,158,11,.12)">🗓️</div>
+          <span class="ptitle">Month-by-Month Breakdown</span>
+        </div>
+      </div>
+      <div class="pbody" style="padding-top:14px">
+        <table class="yoy-table">
+          <thead><tr><th>Month</th><th>This Year</th><th>Last Year</th><th>Change</th></tr></thead>
+          <tbody id="yoyTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+</div><!-- /wrap -->
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+  firebase.initializeApp({
+    apiKey:"AIzaSyCnhYkubvXjU_hmVHfVdmt5rcyA1mdIi3A",
+    authDomain:"expense---tracker-9957e.firebaseapp.com",
+    projectId:"expense---tracker-9957e",
+    storageBucket:"expense---tracker-9957e.appspot.com",
+    messagingSenderId:"736738060052",
+    appId:"1:736738060052:web:7146800447fe6e47190401"
+  });
+  const auth = firebase.auth();
+  const db   = firebase.firestore();
+</script>
+<script>
+  // ── Constants ───────────────────────────────────────────────────────────────
+  const CAT_COLORS = {
+    Food:"#f97316", Transport:"#3b82f6", Shopping:"#ec4899",
+    Bills:"#8b5cf6", Entertainment:"#f59e0b", Other:"#6b7280"
+  };
+  const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  const fmt = v => (typeof formatMoney === "function") ? formatMoney(Number(v||0)) : "₹"+Number(v||0).toLocaleString("en-IN");
+
+  // ── State ───────────────────────────────────────────────────────────────────
+  let currentUser  = null;
+  let allExpenses  = [];
+  let catBudgets   = {};
+  let selectedYear = new Date().getFullYear();
+  let trendChartInst = null, catChartInst = null, yoyChartInst = null;
+
+  // ── Toast ───────────────────────────────────────────────────────────────────
+  function showToast(msg, type="ok") {
+    const t = document.getElementById("toast");
+    t.textContent = msg; t.className = `toast ${type}`; t.style.display = "block";
+    setTimeout(() => t.style.display = "none", 3000);
+  }
+
+  // ── Year selector ───────────────────────────────────────────────────────────
+  document.getElementById("yearPrev").onclick = () => { selectedYear--; renderAll(); };
+  document.getElementById("yearNext").onclick = () => {
+    if (selectedYear < new Date().getFullYear()) { selectedYear++; renderAll(); }
+  };
+
+  // ── Theme toggle ────────────────────────────────────────────────────────────
+  document.getElementById("themeToggle").addEventListener("click", () => {
+    if (typeof toggleTheme === "function") toggleTheme();
+  });
+
+  // ── Nav avatar ──────────────────────────────────────────────────────────────
+  function loadNavAvatar(user) {
+    const el = document.getElementById("navAvatar");
+    if (!el || !user) return;
+    db.collection("users").doc(user.uid).get().then(doc => {
+      if (!doc.exists) return;
+      const d = doc.data();
+      if (d.avatar) { el.innerHTML = `<img src="${d.avatar}" alt="avatar"/>`; }
+      else {
+        const ini = (d.name||user.email||"?").trim().split(" ").map(w=>w[0]).slice(0,2).join("").toUpperCase();
+        const cols = ["#6366f1","#22d3ee","#a78bfa","#10b981","#f59e0b","#ec4899"];
+        let h=0; for(let i=0;i<user.uid.length;i++) h=user.uid.charCodeAt(i)+((h<<5)-h);
+        el.style.background = cols[Math.abs(h)%cols.length];
+        el.textContent = ini;
+      }
+    });
+  }
+
+  // ── Core render ─────────────────────────────────────────────────────────────
+  function renderAll() {
+    document.getElementById("yearLabel").textContent = selectedYear;
+    const thisYearExp  = allExpenses.filter(e => e.dateObj.getFullYear() === selectedYear);
+    const lastYearExp  = allExpenses.filter(e => e.dateObj.getFullYear() === selectedYear - 1);
+
+    renderStats(thisYearExp, lastYearExp);
+    renderInsights(thisYearExp, lastYearExp);
+    renderTrendChart(thisYearExp);
+    renderCatChart(thisYearExp);
+    renderYoYChart(thisYearExp, lastYearExp);
+    renderYoYTable(thisYearExp, lastYearExp);
+    renderCatBudgets(thisYearExp);
+  }
+
+  // ── Stats cards ─────────────────────────────────────────────────────────────
+  function renderStats(exp, lastExp) {
+    const total    = exp.reduce((s,e) => s+e.amount, 0);
+    const months   = [...new Set(exp.map(e => e.dateObj.getMonth()))];
+    const avg      = months.length ? total / months.length : 0;
+
+    // highest month
+    const byMonth  = Array(12).fill(0);
+    exp.forEach(e => byMonth[e.dateObj.getMonth()] += e.amount);
+    const maxIdx   = byMonth.indexOf(Math.max(...byMonth));
+    const maxAmt   = byMonth[maxIdx];
+
+    // top category
+    const byCat = {};
+    exp.forEach(e => byCat[e.category] = (byCat[e.category]||0)+e.amount);
+    const topCat = Object.entries(byCat).sort((a,b)=>b[1]-a[1])[0];
+
+    document.getElementById("statYearTotal").textContent  = fmt(total);
+    document.getElementById("statYearCount").textContent  = `${exp.length} expense${exp.length!==1?"s":""}`;
+    document.getElementById("statMonthAvg").textContent   = fmt(avg);
+    document.getElementById("statHighMonth").textContent  = fmt(maxAmt);
+    document.getElementById("statHighMonthName").textContent = maxAmt > 0 ? MONTHS[maxIdx] : "—";
+    document.getElementById("statTopCat").textContent     = topCat ? topCat[0] : "—";
+    document.getElementById("statTopCatAmt").textContent  = topCat ? fmt(topCat[1]) : "—";
+  }
+
+  // ── Insights ────────────────────────────────────────────────────────────────
+  function renderInsights(exp, lastExp) {
+    // biggest expense
+    const biggest = exp.reduce((m,e) => e.amount > (m?.amount||0) ? e : m, null);
+    document.getElementById("insightBiggest").textContent    = biggest ? fmt(biggest.amount) : "—";
+    document.getElementById("insightBiggestDesc").textContent = biggest ? `${biggest.title} · ${biggest.category}` : "No expenses yet";
+
+    // most active month (by count)
+    const countByMonth = Array(12).fill(0);
+    exp.forEach(e => countByMonth[e.dateObj.getMonth()]++);
+    const maxCount = Math.max(...countByMonth);
+    const maxCountIdx = countByMonth.indexOf(maxCount);
+    document.getElementById("insightActiveMonth").textContent    = maxCount > 0 ? MONTHS[maxCountIdx] : "—";
+    document.getElementById("insightActiveMonthDesc").textContent = maxCount > 0 ? `${maxCount} transactions` : "No data";
+
+    // YoY change
+    const thisTotal = exp.reduce((s,e)=>s+e.amount,0);
+    const lastTotal = lastExp.reduce((s,e)=>s+e.amount,0);
+    const yoyEl    = document.getElementById("insightYoY");
+    const yoyDescEl= document.getElementById("insightYoYDesc");
+    if (lastTotal === 0) {
+      yoyEl.textContent = "—"; yoyDescEl.textContent = "No data for previous year";
+    } else {
+      const pct = ((thisTotal - lastTotal) / lastTotal * 100).toFixed(1);
+      yoyEl.textContent = `${pct > 0 ? "+" : ""}${pct}%`;
+      yoyEl.style.color = pct > 0 ? "var(--red)" : "var(--green)";
+      yoyDescEl.textContent = `${pct > 0 ? "More" : "Less"} than ${selectedYear-1}`;
+    }
+  }
+
+  // ── Trend chart (line) ───────────────────────────────────────────────────────
+  function renderTrendChart(exp) {
+    const byMonth = Array(12).fill(0);
+    exp.forEach(e => byMonth[e.dateObj.getMonth()] += e.amount);
+    document.getElementById("trendLabel").textContent = `Total: ${fmt(byMonth.reduce((a,b)=>a+b,0))}`;
+
+    if (trendChartInst) trendChartInst.destroy();
+    const ctx = document.getElementById("trendChart").getContext("2d");
+
+    // gradient fill
+    const grad = ctx.createLinearGradient(0,0,0,280);
+    grad.addColorStop(0, "rgba(99,102,241,0.3)");
+    grad.addColorStop(1, "rgba(99,102,241,0)");
+
+    trendChartInst = new Chart(ctx, {
+      type: "line",
+      data: {
+        labels: MONTHS,
+        datasets: [{
+          label: "Spending",
+          data: byMonth,
+          borderColor: "#6366f1",
+          backgroundColor: grad,
+          borderWidth: 2.5,
+          pointBackgroundColor: "#6366f1",
+          pointBorderColor: "#fff",
+          pointBorderWidth: 2,
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          fill: true,
+          tension: 0.4,
+        }]
+      },
+      options: {
+        responsive: true,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor:"rgba(10,16,28,.95)", borderColor:"rgba(99,102,241,.3)", borderWidth:1,
+            titleColor:"#f0f4ff", bodyColor:"#94a3b8",
+            callbacks:{ label: ctx => `  ${fmt(ctx.parsed.y)}` }
+          }
+        },
+        scales: {
+          x: { ticks:{ color:"#475569", font:{family:"'Outfit',sans-serif",size:11} }, grid:{ color:"rgba(255,255,255,0.04)" } },
+          y: { ticks:{ color:"#475569", callback: v => fmt(v) }, grid:{ color:"rgba(255,255,255,0.04)" }, beginAtZero:true }
+        }
+      }
+    });
+  }
+
+  // ── Category donut chart ─────────────────────────────────────────────────────
+  function renderCatChart(exp) {
+    const byCat = {};
+    exp.forEach(e => byCat[e.category] = (byCat[e.category]||0)+e.amount);
+    const labels = Object.keys(byCat);
+    const data   = Object.values(byCat);
+    const colors = labels.map(l => CAT_COLORS[l]||"#6b7280");
+
+    if (catChartInst) catChartInst.destroy();
+    if (!labels.length) return;
+    const ctx = document.getElementById("catChart").getContext("2d");
+    catChartInst = new Chart(ctx, {
+      type: "doughnut",
+      data: {
+        labels,
+        datasets:[{ data, backgroundColor:colors.map(c=>c+"bb"), borderColor:colors, borderWidth:2 }]
+      },
+      options:{
+        responsive:true, cutout:"65%",
+        plugins:{
+          legend:{ position:"bottom", labels:{ color:"#94a3b8", font:{family:"'Outfit',sans-serif",size:11}, padding:14 } },
+          tooltip:{
+            backgroundColor:"rgba(10,16,28,.95)", borderColor:"rgba(99,102,241,.3)", borderWidth:1,
+            titleColor:"#f0f4ff", bodyColor:"#94a3b8",
+            callbacks:{ label: ctx => `  ${fmt(ctx.parsed)}` }
+          }
+        }
+      }
+    });
+  }
+
+  // ── Year-over-year bar chart ─────────────────────────────────────────────────
+  function renderYoYChart(exp, lastExp) {
+    const thisMonths = Array(12).fill(0);
+    const lastMonths = Array(12).fill(0);
+    exp.forEach(e     => thisMonths[e.dateObj.getMonth()] += e.amount);
+    lastExp.forEach(e => lastMonths[e.dateObj.getMonth()] += e.amount);
+
+    if (yoyChartInst) yoyChartInst.destroy();
+    const ctx = document.getElementById("yoyChart").getContext("2d");
+    yoyChartInst = new Chart(ctx, {
+      type:"bar",
+      data:{
+        labels: MONTHS,
+        datasets:[
+          { label: String(selectedYear),     data:thisMonths, backgroundColor:"rgba(99,102,241,.75)",  borderColor:"#6366f1", borderWidth:1.5, borderRadius:6 },
+          { label: String(selectedYear - 1), data:lastMonths, backgroundColor:"rgba(34,211,238,.4)",   borderColor:"#22d3ee", borderWidth:1.5, borderRadius:6 },
+        ]
+      },
+      options:{
+        responsive:true,
+        plugins:{
+          legend:{ labels:{ color:"#94a3b8", font:{family:"'Outfit',sans-serif",size:11} } },
+          tooltip:{
+            backgroundColor:"rgba(10,16,28,.95)", borderColor:"rgba(99,102,241,.3)", borderWidth:1,
+            titleColor:"#f0f4ff", bodyColor:"#94a3b8",
+            callbacks:{ label: ctx => `  ${ctx.dataset.label}: ${fmt(ctx.parsed.y)}` }
+          }
+        },
+        scales:{
+          x:{ ticks:{ color:"#475569", font:{family:"'Outfit',sans-serif",size:11} }, grid:{ color:"rgba(255,255,255,0.04)" } },
+          y:{ ticks:{ color:"#475569", callback: v => fmt(v) }, grid:{ color:"rgba(255,255,255,0.04)" }, beginAtZero:true }
+        }
+      }
+    });
+  }
+
+  // ── YoY table ────────────────────────────────────────────────────────────────
+  function renderYoYTable(exp, lastExp) {
+    const thisM = Array(12).fill(0);
+    const lastM = Array(12).fill(0);
+    exp.forEach(e     => thisM[e.dateObj.getMonth()] += e.amount);
+    lastExp.forEach(e => lastM[e.dateObj.getMonth()] += e.amount);
+
+    const tbody = document.getElementById("yoyTableBody");
+    tbody.innerHTML = "";
+    MONTHS.forEach((m, i) => {
+      const t = thisM[i], l = lastM[i];
+      const diff = t - l;
+      const pct  = l > 0 ? ((diff/l)*100).toFixed(0) : null;
+      const cls  = diff > 0 ? "change-up" : diff < 0 ? "change-down" : "change-same";
+      const chg  = pct !== null ? `${diff>0?"+":""}${pct}%` : (t>0?"New":"—");
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td style="color:var(--text);font-family:var(--sans);font-weight:600">${m}</td><td>${t>0?fmt(t):"—"}</td><td>${l>0?fmt(l):"—"}</td><td class="${cls}">${chg}</td>`;
+      tbody.appendChild(tr);
+    });
+  }
+
+  // ── Category budgets ─────────────────────────────────────────────────────────
+  function renderCatBudgets(exp) {
+    const byCat = {};
+    exp.forEach(e => byCat[e.category] = (byCat[e.category]||0)+e.amount);
+    const grid = document.getElementById("catBudgetGrid");
+    grid.innerHTML = "";
+    Object.entries(CAT_COLORS).forEach(([cat, color]) => {
+      const spent  = byCat[cat] || 0;
+      const limit  = catBudgets[cat] || 0;
+      const pct    = limit > 0 ? Math.min((spent/limit)*100, 100) : 0;
+      const barCol = pct >= 100 ? "var(--red)" : pct >= 80 ? "var(--amber)" : color;
+
+      const div = document.createElement("div");
+      div.className = "cat-budget-item";
+      div.innerHTML = `
+        <div class="cat-budget-left">
+          <div class="cat-budget-top">
+            <div class="cat-name"><div class="cat-dot" style="background:${color}"></div>${cat}</div>
+            <div class="cat-amounts"><span>${fmt(spent)}</span> / ${limit>0?fmt(limit):"no limit"}</div>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:${pct}%;background:${barCol}"></div></div>
+        </div>
+        <input class="cat-budget-input" type="number" min="0" placeholder="Limit"
+          id="catLimitInput-${cat}" value="${limit||""}" />`;
+      grid.appendChild(div);
+    });
+  }
+
+  async function saveCategoryBudgets() {
+    const newBudgets = {};
+    Object.keys(CAT_COLORS).forEach(cat => {
+      const el  = document.getElementById(`catLimitInput-${cat}`);
+      const val = Number(el?.value || 0);
+      if (val > 0) newBudgets[cat] = val;
+    });
+    try {
+      await db.collection("users").doc(currentUser.uid).update({ catBudgets: newBudgets });
+      catBudgets = newBudgets;
+      const st = document.getElementById("catBudgetStatus");
+      st.textContent = "Saved ✓"; st.style.color = "var(--green)";
+      setTimeout(() => st.textContent = "", 2500);
+      showToast("Category budgets saved ✓");
+    } catch(err) { showToast(err.message,"err"); }
+  }
+
+  // ── Auth ─────────────────────────────────────────────────────────────────────
+  auth.onAuthStateChanged(async user => {
+    if (!user) { location.href = "login.html"; return; }
+    currentUser = user;
+    loadNavAvatar(user);
+
+    // Load user doc for category budgets
+    const userDoc = await db.collection("users").doc(user.uid).get();
+    if (userDoc.exists) catBudgets = userDoc.data().catBudgets || {};
+
+    // Live listener
+    db.collection("users").doc(user.uid).collection("expenses")
+      .orderBy("createdAt","desc")
+      .onSnapshot(snap => {
+        allExpenses = snap.docs.map(doc => {
+          const d = doc.data();
+          const rawDate = d.date || (d.createdAt ? d.createdAt.toDate().toISOString().split("T")[0] : new Date().toISOString().split("T")[0]);
+          return { id:doc.id, title:d.title||"", amount:d.amount||0, category:d.category||"Other", date:rawDate, dateObj:new Date(rawDate) };
+        });
+        renderAll();
+      });
+  });
+</script>
+</body>
+</html>
